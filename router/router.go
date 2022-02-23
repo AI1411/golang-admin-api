@@ -2,6 +2,7 @@ package router
 
 import (
 	"api/controllers"
+	"api/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 )
@@ -11,6 +12,7 @@ func Router(dbConn *gorm.DB) {
 	userHandler := controllers.UserHandler{Db: dbConn}
 
 	r := gin.Default()
+	r.Use(middleware.Cors())
 	r.GET("/todos", todoHandler.GetAll)
 	r.GET("/todos/:id", todoHandler.GetDetail)
 	r.POST("/todos", todoHandler.CreateTodo)
@@ -22,7 +24,7 @@ func Router(dbConn *gorm.DB) {
 	r.POST("/users", userHandler.CreateUser)
 	r.PUT("/users/:id", userHandler.UpdateUser)
 	r.DELETE("/users/:id", userHandler.DeleteUser)
-	if err := r.Run(); err != nil {
+	if err := r.Run(":8084"); err != nil {
 		return
 	}
 }
