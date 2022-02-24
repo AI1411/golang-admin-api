@@ -14,7 +14,7 @@ type TodoHandler struct {
 
 func (h *TodoHandler) GetAll(ctx *gin.Context) {
 	var todos []models.Todo
-	h.Db.Find(&todos)
+	h.Db.Preload("User").Find(&todos)
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "success",
 		"data":    todos,

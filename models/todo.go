@@ -17,6 +17,7 @@ type Todo struct {
 	Body      string    `json:"body"`
 	Status    string    `json:"status"`
 	UserID    string    `json:"user_id"`
+	User      User      `json:"user"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
