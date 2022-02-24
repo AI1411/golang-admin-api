@@ -2,7 +2,7 @@ package router
 
 import (
 	"api/controllers"
-	"api/middleware"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 )
@@ -12,7 +12,7 @@ func Router(dbConn *gorm.DB) {
 	userHandler := controllers.UserHandler{Db: dbConn}
 
 	r := gin.Default()
-	r.Use(middleware.Cors())
+	r.Use(cors.Default())
 	r.GET("/todos", todoHandler.GetAll)
 	r.GET("/todos/:id", todoHandler.GetDetail)
 	r.POST("/todos", todoHandler.CreateTodo)

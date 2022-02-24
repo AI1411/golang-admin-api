@@ -12,11 +12,11 @@ const (
 )
 
 type Todo struct {
-	ID        uint64    `json:"ID" gorm:"primaryKey"`
+	ID        uint64    `json:"id" gorm:"primaryKey"`
 	Title     string    `json:"title"`
 	Body      string    `json:"body"`
 	Status    string    `json:"status"`
-	UserID    int       `json:"user_id"`
+	UserID    string    `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
