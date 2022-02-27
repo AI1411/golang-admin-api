@@ -86,9 +86,23 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("jwt", token, 3600, "/", "localhost", true, true)
-
+	ctx.SetCookie("jwt", token, 3600, "/", "localhost", false, true)
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "認証に成功しました",
+	})
+}
+
+func (h *AuthHandler) Me(ctx *gin.Context) {
+	cookie, _ := ctx.Cookie("jwt")
+
+	id, _ := util.ParseJwt(cookie)
+
+	var user models.User
+
+	h.Db.Where("id = ?", id).First(&user)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "its me!",
+		"user":    user,
 	})
 }

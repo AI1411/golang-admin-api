@@ -28,6 +28,7 @@ func Router(dbConn *gorm.DB) {
 
 	r.POST("register", authHandler.Register)
 	r.POST("login", authHandler.Login)
+	r.GET("me", authHandler.Me)
 	if err := r.Run(":8084"); err != nil {
 		return
 	}
