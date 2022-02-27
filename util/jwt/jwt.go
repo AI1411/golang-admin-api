@@ -2,6 +2,7 @@ package util
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"log"
 	"time"
 )
 
@@ -26,6 +27,8 @@ func ParseJwt(cookie string) (string, error) {
 	if err != nil || !token.Valid {
 		return "", nil
 	}
+
+	log.Printf("test %+v", err)
 
 	claims := token.Claims.(*jwt.StandardClaims)
 
