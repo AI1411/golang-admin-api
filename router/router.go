@@ -25,6 +25,7 @@ func Router(dbConn *gorm.DB) {
 	r.POST("/users", userHandler.CreateUser)
 	r.PUT("/users/:id", userHandler.UpdateUser)
 	r.DELETE("/users/:id", userHandler.DeleteUser)
+	r.PUT("/users/:id/uploadImage", userHandler.UploadUserImage)
 
 	r.POST("register", authHandler.Register)
 	r.POST("login", authHandler.Login)

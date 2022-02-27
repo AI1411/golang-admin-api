@@ -93,3 +93,18 @@ func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 		"message": "削除されました",
 	})
 }
+
+func (h *UserHandler) UploadUserImage(ctx *gin.Context) {
+	user := models.User{}
+	id := ctx.Param("id")
+	if err := h.Db.First(&user, id).Error; err != nil {
+		restErr := errors.NewBadRequestError("invalid request")
+		ctx.JSON(restErr.Status(), restErr)
+		return
+	}
+	user.UploadImage(ctx)
+	h.Db.Save(&user)
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "画像がアップロードされました",
+	})
+}
