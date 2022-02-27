@@ -3,9 +3,14 @@ package controllers
 import (
 	"api/models"
 	"api/util/errors"
+	"encoding/csv"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/http"
+	"os"
+	"strconv"
+	"time"
 )
 
 type UserHandler struct {
@@ -107,4 +112,54 @@ func (h *UserHandler) UploadUserImage(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "画像がアップロードされました",
 	})
+}
+
+func (h *UserHandler) ExportCSV(ctx *gin.Context) {
+	fileName := time.Now().Format("202101011111") + "_users.csv"
+	filePath := "assets/csv/users/" + fileName
+
+	if err := h.CreateFile(filePath); err != nil {
+		log.Printf("test %+v", err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "CSVを出力しました",
+	})
+}
+
+func (h *UserHandler) CreateFile(filepath string) error {
+	file, err := os.Create(filepath)
+
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	var users []models.User
+
+	h.Db.Find(&users)
+
+	writer.Write([]string{
+		"ID", "LastName", "FirstName", "Email", "Age",
+	})
+
+	for _, user := range users {
+		data := []string{
+			strconv.Itoa(user.ID),
+			user.LastName,
+			user.FirstName,
+			user.Email,
+			strconv.Itoa(int(user.Age)),
+		}
+
+		if err = writer.Write(data); err != nil {
+			return err
+		}
+	}
+	return nil
 }
