@@ -5,7 +5,6 @@ import (
 	"api/util/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"log"
 	"net/http"
 )
 
@@ -16,7 +15,6 @@ type UserHandler struct {
 func (h *UserHandler) GetAllUser(ctx *gin.Context) {
 	var users []models.User
 	h.Db.Preload("Todos").Find(&users)
-	log.Printf("users %+v", users)
 	for _, user := range users {
 		u := &models.User{
 			ID:        user.ID,
@@ -30,9 +28,7 @@ func (h *UserHandler) GetAllUser(ctx *gin.Context) {
 			UpdatedAt: user.UpdatedAt,
 			Todos:     user.Todos,
 		}
-		log.Printf("u %+v", *u)
 		user = *u
-		log.Printf("user %+v", user)
 	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "success",
@@ -84,7 +80,7 @@ func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 	})
 }
 
-func (h UserHandler) DeleteUser(ctx *gin.Context) {
+func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 	user := models.User{}
 	id := ctx.Param("id")
 	if err := h.Db.First(&user, id).Error; err != nil {

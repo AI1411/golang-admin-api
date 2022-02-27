@@ -9,15 +9,15 @@ const DefaultPasswordCost = 14
 
 type User struct {
 	ID        int       `json:"id" gorm:"primaryKey"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	Image     string    `json:"image"`
-	Age       uint8     `json:"age"`
-	Email     string    `json:"email"`
-	Password  []byte    `json:"password"`
+	FirstName string    `json:"first_name" binding:"required,max=16"`
+	LastName  string    `json:"last_name" binding:"required,max=16"`
+	Image     string    `json:"image" binding:"required,max=16"`
+	Age       uint8     `json:"age" binding:"required,max=16"`
+	Email     string    `json:"email" binding:"required,max=16"`
+	Password  []byte    `json:"password" binding:"required,max=16"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	Todos     []Todo    `json:"todos"`
+	Todos     []Todo    `json:"todos" binding:"omitempty"`
 }
 
 func (user *User) SetPassword(password string) {
