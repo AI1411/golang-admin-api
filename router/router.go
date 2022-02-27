@@ -27,6 +27,7 @@ func Router(dbConn *gorm.DB) {
 	r.DELETE("/users/:id", userHandler.DeleteUser)
 
 	r.POST("register", authHandler.Register)
+	r.POST("login", authHandler.Login)
 	if err := r.Run(":8084"); err != nil {
 		return
 	}
