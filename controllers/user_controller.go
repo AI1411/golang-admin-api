@@ -5,6 +5,7 @@ import (
 	"api/util/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"log"
 	"net/http"
 )
 
@@ -15,6 +16,24 @@ type UserHandler struct {
 func (h *UserHandler) GetAllUser(ctx *gin.Context) {
 	var users []models.User
 	h.Db.Preload("Todos").Find(&users)
+	log.Printf("users %+v", users)
+	for _, user := range users {
+		u := &models.User{
+			ID:        user.ID,
+			FirstName: user.FirstName,
+			LastName:  user.LastName,
+			Image:     "http://localhost:8084" + user.Image,
+			Age:       user.Age,
+			Email:     user.Email,
+			Password:  user.Password,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+			Todos:     user.Todos,
+		}
+		log.Printf("u %+v", *u)
+		user = *u
+		log.Printf("user %+v", user)
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "success",
 		"data":    users,
@@ -39,6 +58,8 @@ func (h *UserHandler) CreateUser(ctx *gin.Context) {
 		ctx.JSON(restErr.Status(), restErr)
 		return
 	}
+	user.SetPassword("123456")
+
 	h.Db.Create(&user)
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "success",
