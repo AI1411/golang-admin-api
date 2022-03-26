@@ -1,0 +1,51 @@
+linters:
+  # disable-all: false
+  disable:
+    - deadcode
+    - unused
+  enable:
+    - govet # Vet examines Go source code and reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
+    - errcheck # Errcheck is a program for checking for unchecked errors in go programs. These unchecked errors can be critical bugs in some cases
+    - staticcheck # Staticcheck is a go vet on steroids, applying a ton of static analysis checks
+    # - unused # Checks Go code for unused constants, variables, functions and types
+    - gosimple # Linter for Go source code that specializes in simplifying a code
+    - structcheck # Finds unused struct fields
+    - varcheck # Finds unused global variables and constants
+    - bodyclose # checks whether HTTP response body is closed successfully
+    - gosec # Inspects source code for security problems
+    - unconvert # Remove unnecessary type conversions
+    - gocyclo # Computes and checks the cyclomatic complexity of functions
+    - gocognit # Computes and checks the cognitive complexity of functions
+    - goimports # Goimports does everything that gofmt does. Additionally it checks unused imports
+    - misspell # Finds commonly misspelled English words in comments
+    - lll # Reports long lines
+    - gofumpt 
+    # - paralleltest
+    - revive # Fast, configurable, extensible, flexible, and beautiful linter for Go. Drop-in replacement of golint.
+
+linters-settings:
+  gocyclo:
+    min-complexity: 10
+  gocognit:
+    min-complexity: 10
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - lll
+        - gocognit
+        - gocyclo
+        - errcheck
+    # Exclude lll コメント行かつURLを含む場合、除外
+    - linters:
+        - lll
+      source: "^[\t ]*//.*"
+    - linters:
+        - lll
+      source: "`json:\".*\""
+    - linters:
+        - lll
+      source: "`form:\".*\""
+    - linters:
+        - lll
+      source: "`decode_from:\".*\""

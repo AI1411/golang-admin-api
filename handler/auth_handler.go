@@ -1,15 +1,17 @@
 package handler
 
 import (
-	"api/models"
-	util "api/util/jwt"
 	"errors"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"net/http"
 	"strconv"
 	"time"
+
+	"api/models"
+	util "api/util/jwt"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
 type Claims struct {
@@ -82,7 +84,6 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 	}
 
 	token, err := util.GenerateJwt(strconv.Itoa(user.ID))
-
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "認証に失敗しました",

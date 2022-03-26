@@ -3,10 +3,11 @@ package models
 import (
 	"crypto/sha1"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	"path/filepath"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/olahol/go-imageupload"
 )

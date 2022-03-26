@@ -1,16 +1,18 @@
 package handler
 
 import (
-	"api/models"
-	"api/util/errors"
 	"encoding/csv"
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"time"
+
+	"api/models"
+	"api/util/errors"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
 )
 
 type UserHandler struct {
@@ -134,7 +136,6 @@ func (h *UserHandler) ExportCSV(ctx *gin.Context) {
 
 func (h *UserHandler) CreateFile(filepath string) error {
 	file, err := os.Create(filepath)
-
 	if err != nil {
 		return err
 	}
