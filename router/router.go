@@ -1,11 +1,26 @@
 package router
 
 import (
-	"api/db"
-	"api/handler"
+	"github.com/AI1411/golang-admin-api/db"
+	"github.com/AI1411/golang-admin-api/docs"
+	"github.com/AI1411/golang-admin-api/handler"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+// @BasePath /api/v1
+
+// PingExample godoc
+// @Summary ping test
+// @Schemes
+// @Description do ping
+// @Tags TodoHandler
+// @Accept json
+// @Produce json
+// @Success 200 {json} Helloworld
+// @Router /todos [get]
 
 func Router() *gin.Engine {
 	dbConn := db.Init()
@@ -32,6 +47,10 @@ func Router() *gin.Engine {
 	r.POST("register", authHandler.Register)
 	r.POST("login", authHandler.Login)
 	r.GET("me", authHandler.Me)
+
+	docs.SwaggerInfo.BasePath = "/"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+
 	r.Run()
 
 	return r

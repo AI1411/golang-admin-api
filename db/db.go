@@ -1,7 +1,7 @@
 package db
 
 import (
-	"api/models"
+	"github.com/AI1411/golang-admin-api/models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )

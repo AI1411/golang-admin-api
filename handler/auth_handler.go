@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"api/models"
-	util "api/util/jwt"
+	"github.com/AI1411/golang-admin-api/models"
+	util "github.com/AI1411/golang-admin-api/util/jwt"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"

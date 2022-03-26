@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"api/models"
-	"api/util/errors"
+	"github.com/AI1411/golang-admin-api/models"
+	"github.com/AI1411/golang-admin-api/util/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 )

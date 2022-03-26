@@ -1,7 +1,7 @@
 package main
 
 import (
-	"api/router"
+	"github.com/AI1411/golang-admin-api/router"
 )
 
 func main() {
