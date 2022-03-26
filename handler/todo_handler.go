@@ -29,26 +29,28 @@ func (h *TodoHandler) GetAll(ctx *gin.Context) {
 func (h *TodoHandler) GetDetail(ctx *gin.Context) {
 	var todo models.Todo
 	id := ctx.Param("id")
-	h.Db.Where("id = ?", id).Find(&todo)
+	if err := h.Db.Where("id = ?", id).Find(&todo).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("todo not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
+		return
+	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "success",
-		"data":    todo,
-	})
+	ctx.JSON(http.StatusOK, todo)
 }
 
 func (h *TodoHandler) CreateTodo(ctx *gin.Context) {
 	todo := models.Todo{}
 	if err := ctx.ShouldBindJSON(&todo); err != nil {
-		restErr := errors.NewBadRequestError("invalid request")
+		restErr := errors.NewBadRequestError(err.Error())
 		ctx.JSON(restErr.Status(), restErr)
 		return
 	}
 	h.Db.Create(&todo)
-	ctx.JSON(http.StatusCreated, gin.H{
-		"message": "success",
-		"data":    todo,
-	})
+	ctx.JSON(http.StatusCreated, todo)
 	return
 }
 
@@ -62,10 +64,7 @@ func (h *TodoHandler) UpdateTodo(ctx *gin.Context) {
 		return
 	}
 	h.Db.Save(&todo)
-	ctx.JSON(http.StatusAccepted, gin.H{
-		"message": "success",
-		"data":    todo,
-	})
+	ctx.JSON(http.StatusAccepted, todo)
 }
 
 func (h TodoHandler) DeleteTodo(ctx *gin.Context) {
@@ -77,7 +76,5 @@ func (h TodoHandler) DeleteTodo(ctx *gin.Context) {
 		return
 	}
 	h.Db.Delete(&todo)
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "削除されました",
-	})
+	ctx.Status(http.StatusNoContent)
 }
