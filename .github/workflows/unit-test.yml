@@ -1,0 +1,38 @@
+name: run unit tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: "root"
+          MYSQL_DATABASE: "go"
+        ports:
+          - "3306:3306"
+    env:
+      TZ: "Asia/Tokyo"
+
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.17
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: run migrations
+        run: go run main.go
+
+      - name: Test
+        run: make test
