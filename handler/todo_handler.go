@@ -45,8 +45,8 @@ func (h *TodoHandler) GetDetail(ctx *gin.Context) {
 func (h *TodoHandler) CreateTodo(ctx *gin.Context) {
 	todo := models.Todo{}
 	if err := ctx.ShouldBindJSON(&todo); err != nil {
-		restErr := errors.NewBadRequestError(err.Error())
-		ctx.JSON(restErr.Status(), restErr)
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
 	h.Db.Create(&todo)
