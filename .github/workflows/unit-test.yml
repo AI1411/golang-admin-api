@@ -35,4 +35,4 @@ jobs:
         run: go build main.go
 
       - name: Test
-        run: make test
+        run: go test ./...
