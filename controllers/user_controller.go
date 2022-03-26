@@ -17,6 +17,10 @@ type UserHandler struct {
 	Db *gorm.DB
 }
 
+func NewUserHandler(db *gorm.DB) *UserHandler {
+	return &UserHandler{Db: db}
+}
+
 func (h *UserHandler) GetAllUser(ctx *gin.Context) {
 	var users []models.User
 	h.Db.Preload("Todos").Find(&users)

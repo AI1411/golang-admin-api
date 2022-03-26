@@ -12,6 +12,10 @@ type TodoHandler struct {
 	Db *gorm.DB
 }
 
+func NewTodoHandler(db *gorm.DB) *TodoHandler {
+	return &TodoHandler{Db: db}
+}
+
 func (h *TodoHandler) GetAll(ctx *gin.Context) {
 	var todos []models.Todo
 	h.Db.Preload("User").Find(&todos)

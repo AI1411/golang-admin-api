@@ -20,6 +20,10 @@ type AuthHandler struct {
 	Db *gorm.DB
 }
 
+func NewAuthHandler(db *gorm.DB) *AuthHandler {
+	return &AuthHandler{Db: db}
+}
+
 func (h *AuthHandler) Register(ctx *gin.Context) {
 	var data map[string]string
 

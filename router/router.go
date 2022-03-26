@@ -8,9 +8,9 @@ import (
 )
 
 func Router(dbConn *gorm.DB) {
-	todoHandler := controllers.TodoHandler{Db: dbConn}
-	userHandler := controllers.UserHandler{Db: dbConn}
-	authHandler := controllers.AuthHandler{Db: dbConn}
+	todoHandler := controllers.NewTodoHandler(dbConn)
+	userHandler := controllers.NewUserHandler(dbConn)
+	authHandler := controllers.NewAuthHandler(dbConn)
 
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -31,7 +31,7 @@ func Router(dbConn *gorm.DB) {
 	r.POST("register", authHandler.Register)
 	r.POST("login", authHandler.Login)
 	r.GET("me", authHandler.Me)
-	if err := r.Run(":8084"); err != nil {
+	if err := r.Run(); err != nil {
 		return
 	}
 }
