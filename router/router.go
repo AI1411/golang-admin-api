@@ -2,12 +2,13 @@ package router
 
 import (
 	"api/controllers"
+	"api/db"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 )
 
-func Router(dbConn *gorm.DB) {
+func Router() *gin.Engine {
+	dbConn := db.Init()
 	todoHandler := controllers.NewTodoHandler(dbConn)
 	userHandler := controllers.NewUserHandler(dbConn)
 	authHandler := controllers.NewAuthHandler(dbConn)
@@ -31,7 +32,7 @@ func Router(dbConn *gorm.DB) {
 	r.POST("register", authHandler.Register)
 	r.POST("login", authHandler.Login)
 	r.GET("me", authHandler.Me)
-	if err := r.Run(); err != nil {
-		return
-	}
+	r.Run()
+
+	return r
 }
