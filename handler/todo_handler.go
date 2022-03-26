@@ -1,4 +1,4 @@
-package controllers
+package handler
 
 import (
 	"api/models"
@@ -20,8 +20,8 @@ func (h *TodoHandler) GetAll(ctx *gin.Context) {
 	var todos []models.Todo
 	h.Db.Preload("User").Find(&todos)
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "success",
-		"data":    todos,
+		"total": len(todos),
+		"todos": todos,
 	})
 }
 

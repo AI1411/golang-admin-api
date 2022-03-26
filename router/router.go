@@ -1,17 +1,17 @@
 package router
 
 import (
-	"api/controllers"
 	"api/db"
+	"api/handler"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func Router() *gin.Engine {
 	dbConn := db.Init()
-	todoHandler := controllers.NewTodoHandler(dbConn)
-	userHandler := controllers.NewUserHandler(dbConn)
-	authHandler := controllers.NewAuthHandler(dbConn)
+	todoHandler := handler.NewTodoHandler(dbConn)
+	userHandler := handler.NewUserHandler(dbConn)
+	authHandler := handler.NewAuthHandler(dbConn)
 
 	r := gin.Default()
 	r.Use(cors.Default())
