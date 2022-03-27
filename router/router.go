@@ -23,7 +23,6 @@ func Router() *gin.Engine {
 
 	r.GET("/users", userHandler.GetAllUser)
 	r.GET("/users/:id", userHandler.GetUserDetail)
-	r.POST("/users", userHandler.CreateUser)
 	r.PUT("/users/:id", userHandler.UpdateUser)
 	r.DELETE("/users/:id", userHandler.DeleteUser)
 	r.PUT("/users/:id/uploadImage", userHandler.UploadUserImage)
