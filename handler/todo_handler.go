@@ -19,7 +19,7 @@ func NewTodoHandler(db *gorm.DB) *TodoHandler {
 type searchTodoPrams struct {
 	Title     *string `form:"title" binding:"omitempty,max=64"`
 	Body      *string `form:"body" binding:"omitempty,max=64"`
-	Status    *string `form:"status" binding:"omitempty,oneof=waiting canceled processing done"`
+	Status    *string `form:"status" binding:"omitempty,oneof=success waiting canceled processing done"`
 	UserId    *string `form:"user_id" binding:"omitempty,numeric,max=64"`
 	CreatedAt string  `form:"created_at" binding:"omitempty,datetime"`
 	Offset    string  `form:"offset" binding:"omitempty,numeric"`

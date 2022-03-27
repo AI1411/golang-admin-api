@@ -108,6 +108,94 @@ var todoHandlerTestCases = []struct {
 			]
 		}`,
 	},
+	{
+		tid:  4,
+		name: "titleで検索",
+		request: map[string]interface{}{
+			"title": "test1",
+		},
+		wantStatus: http.StatusOK,
+		wantBody: `{
+			"todos": [
+				{
+					"id": 1,
+					"title": "test1",
+					"body": "body1",
+					"status": "success",
+					"user_id": 1,
+					"created_at": "2022-03-26T21:34:52+09:00",
+					"updated_at": "2022-03-26T21:34:52+09:00"
+				}
+			],
+    		"total": 1
+		}`,
+	},
+	{
+		tid:  5,
+		name: "Bodyで検索",
+		request: map[string]interface{}{
+			"body": "body1",
+		},
+		wantStatus: http.StatusOK,
+		wantBody: `{
+			"todos": [
+				{
+					"id": 1,
+					"title": "test1",
+					"body": "body1",
+					"status": "success",
+					"user_id": 1,
+					"created_at": "2022-03-26T21:34:52+09:00",
+					"updated_at": "2022-03-26T21:34:52+09:00"
+				}
+			],
+    		"total": 1
+		}`,
+	},
+	{
+		tid:  6,
+		name: "Statusで検索",
+		request: map[string]interface{}{
+			"status": "success",
+		},
+		wantStatus: http.StatusOK,
+		wantBody: `{
+			"todos": [
+				{
+					"id": 1,
+					"title": "test1",
+					"body": "body1",
+					"status": "success",
+					"user_id": 1,
+					"created_at": "2022-03-26T21:34:52+09:00",
+					"updated_at": "2022-03-26T21:34:52+09:00"
+				}
+			],
+    		"total": 1
+		}`,
+	},
+	{
+		tid:  7,
+		name: "UserIDで検索",
+		request: map[string]interface{}{
+			"user_id": "1",
+		},
+		wantStatus: http.StatusOK,
+		wantBody: `{
+			"todos": [
+				{
+					"id": 1,
+					"title": "test1",
+					"body": "body1",
+					"status": "success",
+					"user_id": 1,
+					"created_at": "2022-03-26T21:34:52+09:00",
+					"updated_at": "2022-03-26T21:34:52+09:00"
+				}
+			],
+    		"total": 1
+		}`,
+	},
 }
 
 func TestNewTodoHandler(t *testing.T) {
