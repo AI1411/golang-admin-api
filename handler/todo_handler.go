@@ -1,13 +1,11 @@
 package handler
 
 import (
-	"net/http"
-	"time"
-
 	"github.com/AI1411/golang-admin-api/models"
 	"github.com/AI1411/golang-admin-api/util/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"net/http"
 )
 
 type TodoHandler struct {
@@ -19,19 +17,20 @@ func NewTodoHandler(db *gorm.DB) *TodoHandler {
 }
 
 type searchTodoPrams struct {
-	Title     *string   `form:"title" binding:"omitempty,max=64"`
-	Body      *string   `form:"body" binding:"omitempty,max=64"`
-	Status    *string   `form:"status" binding:"omitempty,oneof=waiting canceled processing done"`
-	UserId    *string   `form:"user_id" binding:"omitempty"`
-	CreatedAt time.Time `form:"created_at" binding:"omitempty,datetime"`
-	Offset    string    `form:"offset" binding:"omitempty,min=0"`
-	Limit     string    `form:"limit" binding:"omitempty,min=0"`
+	Title     *string `form:"title" binding:"omitempty,max=64"`
+	Body      *string `form:"body" binding:"omitempty,max=64"`
+	Status    *string `form:"status" binding:"omitempty,oneof=waiting canceled processing done"`
+	UserId    *string `form:"user_id" binding:"omitempty,numeric,max=64"`
+	CreatedAt string  `form:"created_at" binding:"omitempty,datetime"`
+	Offset    string  `form:"offset" binding:"omitempty,numeric"`
+	Limit     string  `form:"limit" binding:"omitempty,numeric"`
 }
 
 func (h *TodoHandler) GetAll(ctx *gin.Context) {
 	var params searchTodoPrams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
-		ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid query params"))
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
 	var todos []models.Todo
@@ -111,7 +110,7 @@ func createBaseQueryBuilder(param searchTodoPrams, h *TodoHandler) *gorm.DB {
 	if param.UserId != nil {
 		query = query.Where("user_id = ?", param.UserId)
 	}
-	if !param.CreatedAt.IsZero() {
+	if param.CreatedAt != "" {
 		query = query.Where("created_at = ?", param.CreatedAt)
 	}
 	if param.Offset != "" {

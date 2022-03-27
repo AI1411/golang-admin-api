@@ -1,25 +1,28 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/AI1411/golang-admin-api/db"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 )
 
 var todoHandlerTestCases = []struct {
 	tid        int
 	name       string
-	request    interface{}
+	request    map[string]interface{}
 	wantStatus int
 	wantBody   string
 }{
 	{
 		tid:        1,
 		name:       "TODO一覧が正常に取得できること",
-		request:    nil,
+		request:    map[string]interface{}{},
 		wantStatus: http.StatusOK,
 		wantBody: `{
 			"todos": [
@@ -45,6 +48,66 @@ var todoHandlerTestCases = []struct {
     		"total": 2
 		}`,
 	},
+	{
+		tid:  2,
+		name: "検索結果0件",
+		request: map[string]interface{}{
+			"title": "test3",
+		},
+		wantStatus: http.StatusOK,
+		wantBody: `{
+			"todos": [],
+    		"total": 0
+		}`,
+	},
+	{
+		tid:  3,
+		name: "パラメータのバリデーションエラー",
+		request: map[string]interface{}{
+			"title":      strings.Repeat("a", 65),
+			"body":       strings.Repeat("a", 65),
+			"status":     "not_status",
+			"user_id":    strings.Repeat("a", 65),
+			"created_at": "2020/1/1",
+			"offset":     "not_numeric",
+			"limit":      "not_numeric",
+		},
+		wantStatus: http.StatusBadRequest,
+		wantBody: `{
+			"code": 400,
+			"message": "パラメータが不正です",
+			"details": [
+				{
+					"attribute": "Title",
+					"message": "Titleは不正です"
+				},
+				{
+					"attribute": "Body",
+					"message": "Bodyは不正です"
+				},
+				{
+					"attribute": "Status",
+					"message": "Statusは不正です"
+				},
+ 				{
+            		"attribute": "UserId",
+            		"message": "UserIdは不正です"
+				},
+				{
+					"attribute": "CreatedAt",
+					"message": "CreatedAtは不正です"
+				},
+				{
+					"attribute": "Offset",
+					"message": "Offsetは不正です"
+				},
+				{
+					"attribute": "Limit",
+					"message": "Limitは不正です"
+				}
+			]
+		}`,
+	},
 }
 
 func TestNewTodoHandler(t *testing.T) {
@@ -59,8 +122,17 @@ func TestNewTodoHandler(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+			var req *http.Request
+			var query string
+			for k, v := range tt.request {
+				query = query + fmt.Sprintf("&%s=%s", k, url.QueryEscape(fmt.Sprint(v)))
+			}
+			if query != "" {
+				query = "?" + query
+			}
 			rec := httptest.NewRecorder()
-			r.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/todos", nil))
+			req = httptest.NewRequest(http.MethodGet, "/todos"+query, nil)
+			r.ServeHTTP(rec, req)
 			assert.Equal(t, tt.wantStatus, rec.Code)
 			assert.JSONEq(t, tt.wantBody, rec.Body.String())
 		})
