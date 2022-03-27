@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/AI1411/golang-admin-api/models"
 	"github.com/AI1411/golang-admin-api/util/errors"
@@ -17,9 +18,25 @@ func NewTodoHandler(db *gorm.DB) *TodoHandler {
 	return &TodoHandler{Db: db}
 }
 
+type searchTodoPrams struct {
+	Title     *string   `form:"title" binding:"omitempty,max=64"`
+	Body      *string   `form:"body" binding:"omitempty,max=64"`
+	Status    *string   `form:"status" binding:"omitempty,oneof=waiting canceled processing done"`
+	UserId    *string   `form:"user_id" binding:"omitempty"`
+	CreatedAt time.Time `form:"created_at" binding:"omitempty,datetime"`
+	Offset    string    `form:"offset" binding:"omitempty,min=0"`
+	Limit     string    `form:"limit" binding:"omitempty,min=0"`
+}
+
 func (h *TodoHandler) GetAll(ctx *gin.Context) {
+	var params searchTodoPrams
+	if err := ctx.ShouldBindQuery(&params); err != nil {
+		ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid query params"))
+		return
+	}
 	var todos []models.Todo
-	h.Db.Preload("User").Find(&todos)
+	query := createBaseQueryBuilder(params, h)
+	query.Find(&todos)
 	ctx.JSON(http.StatusOK, gin.H{
 		"total": len(todos),
 		"todos": todos,
@@ -77,4 +94,31 @@ func (h TodoHandler) DeleteTodo(ctx *gin.Context) {
 	}
 	h.Db.Delete(&todo)
 	ctx.Status(http.StatusNoContent)
+}
+
+func createBaseQueryBuilder(param searchTodoPrams, h *TodoHandler) *gorm.DB {
+	var todos []models.Todo
+	query := h.Db.Find(&todos)
+	if param.Title != nil {
+		query = query.Where("title LIKE ?", "%"+*param.Title+"%")
+	}
+	if param.Body != nil {
+		query = query.Where("body LIKE ?", "%"+*param.Body+"%")
+	}
+	if param.Status != nil {
+		query = query.Where("status = ?", param.Status)
+	}
+	if param.UserId != nil {
+		query = query.Where("user_id = ?", param.UserId)
+	}
+	if !param.CreatedAt.IsZero() {
+		query = query.Where("created_at = ?", param.CreatedAt)
+	}
+	if param.Offset != "" {
+		query = query.Offset(param.Offset)
+	}
+	if param.Limit != "" {
+		query = query.Limit(param.Limit)
+	}
+	return query
 }
