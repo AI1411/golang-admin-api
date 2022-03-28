@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-var todoHandlerTestCases = []struct {
+var getTodosTestCases = []struct {
 	tid        int
 	name       string
 	request    map[string]interface{}
@@ -198,7 +198,7 @@ var todoHandlerTestCases = []struct {
 	},
 }
 
-func TestNewTodoHandler(t *testing.T) {
+func TestGetTodos(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE todos")
 	dbConn.Exec("insert into todos values (1, 'test1', 'body1', 'success', 1, '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 2, '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
@@ -206,7 +206,7 @@ func TestNewTodoHandler(t *testing.T) {
 	todoHandler := NewTodoHandler(dbConn)
 	r.GET("/todos", todoHandler.GetAll)
 
-	for _, tt := range todoHandlerTestCases {
+	for _, tt := range getTodosTestCases {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
@@ -220,6 +220,51 @@ func TestNewTodoHandler(t *testing.T) {
 			}
 			rec := httptest.NewRecorder()
 			req = httptest.NewRequest(http.MethodGet, "/todos"+query, nil)
+			r.ServeHTTP(rec, req)
+			assert.Equal(t, tt.wantStatus, rec.Code)
+			assert.JSONEq(t, tt.wantBody, rec.Body.String())
+		})
+	}
+}
+
+var getTodoDetailTestCases = []struct {
+	tid        int
+	name       string
+	request    map[string]interface{}
+	wantStatus int
+	wantBody   string
+}{
+	{
+		tid:        1,
+		name:       "TODO詳細が正常に取得できること",
+		wantStatus: http.StatusOK,
+		wantBody: `{
+				"id": 1,
+				"title": "test1",
+				"body": "body1",
+				"status": "success",
+				"user_id": 1,
+				"created_at": "2022-03-26T21:34:52+09:00",
+				"updated_at": "2022-03-26T21:34:52+09:00"
+		}`,
+	},
+}
+
+func TestTodoDetail(t *testing.T) {
+	dbConn := db.Init()
+	dbConn.Exec("TRUNCATE TABLE todos")
+	dbConn.Exec("insert into todos values (1, 'test1', 'body1', 'success', 1, '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 2, '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
+	r := gin.New()
+	todoHandler := NewTodoHandler(dbConn)
+	r.GET("/todos/:id", todoHandler.GetDetail)
+
+	for _, tt := range getTodoDetailTestCases {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			var req *http.Request
+			rec := httptest.NewRecorder()
+			req = httptest.NewRequest(http.MethodGet, "/todos/1", nil)
 			r.ServeHTTP(rec, req)
 			assert.Equal(t, tt.wantStatus, rec.Code)
 			assert.JSONEq(t, tt.wantBody, rec.Body.String())
