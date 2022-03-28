@@ -31,8 +31,11 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
+      - name: module install
+        run: go get -u github.com/kyoh86/richgo
+
       - name: run migrations
         run: go build main.go
 
       - name: Test
-        run: go test ./...
+        run: make test

@@ -6,3 +6,6 @@ lint:
 fmt:
 	go fmt ./...
 	gofumpt -l -w .
+
+test:
+	richgo test ./... -v
