@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/AI1411/golang-admin-api/db"
 	"github.com/gin-gonic/gin"
@@ -265,6 +267,59 @@ func TestTodoDetail(t *testing.T) {
 			var req *http.Request
 			rec := httptest.NewRecorder()
 			req = httptest.NewRequest(http.MethodGet, "/todos/1", nil)
+			r.ServeHTTP(rec, req)
+			assert.Equal(t, tt.wantStatus, rec.Code)
+			assert.JSONEq(t, tt.wantBody, rec.Body.String())
+		})
+	}
+}
+
+var createTodoTestCases = []struct {
+	tid        int
+	name       string
+	request    map[string]interface{}
+	wantStatus int
+	wantBody   string
+}{
+	{
+		tid:  1,
+		name: "TODOが正常に作成できること",
+		request: map[string]interface{}{
+			"title":      "test",
+			"body":       "test",
+			"status":     "success",
+			"user_id":    1,
+			"created_at": "2022-01-01T00:00:00.880012+09:00",
+			"updated_at": "2022-01-01T00:00:00.880012+09:00",
+		},
+		wantStatus: http.StatusCreated,
+		wantBody: `{
+			"id": 1,
+			"title": "test",
+			"body": "test",
+			"status": "success",
+			"user_id": 1,
+			"created_at": "2022-01-01T00:00:00.880012+09:00",
+			"updated_at": "2022-01-01T00:00:00.880012+09:00"
+		}`,
+	},
+}
+
+func TestCreateTodo(t *testing.T) {
+	dbConn := db.Init()
+	dbConn.Exec("TRUNCATE TABLE todos")
+	r := gin.New()
+	todoHandler := NewTodoHandler(dbConn)
+	r.POST("/todos", todoHandler.CreateTodo)
+
+	for _, tt := range createTodoTestCases {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			var req *http.Request
+			rec := httptest.NewRecorder()
+			jsonStr, _ := json.Marshal(tt.request)
+			req = httptest.NewRequest(http.MethodPost, "/todos", bytes.NewBuffer(jsonStr))
 			r.ServeHTTP(rec, req)
 			assert.Equal(t, tt.wantStatus, rec.Code)
 			assert.JSONEq(t, tt.wantBody, rec.Body.String())
