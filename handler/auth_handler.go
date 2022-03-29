@@ -26,36 +26,48 @@ func NewAuthHandler(db *gorm.DB) *AuthHandler {
 	return &AuthHandler{Db: db}
 }
 
-func (h *AuthHandler) Register(ctx *gin.Context) {
-	var data map[string]string
+type authRequest struct {
+	LastName             string `json:"last_name" binding:"required"`
+	FirstName            string `json:"first_name" binding:"required"`
+	Age                  uint8  `json:"age" binding:"required"`
+	Image                string `json:"image" binding:"omitempty"`
+	Email                string `json:"email" binding:"required"`
+	Password             string `json:"password" binding:"required"`
+	PasswordConfirmation string `json:"password_confirmation" binding:"required"`
+}
 
-	if err := ctx.ShouldBindJSON(&data); err != nil {
+type loginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+func (h *AuthHandler) Register(ctx *gin.Context) {
+	var req authRequest
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		panic(err)
 	}
 
-	if data["password"] != data["password_confirmation"] {
+	if req.Password != req.PasswordConfirmation {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "パスワードが一致しません",
 		})
 		return
 	}
-	age, _ := strconv.Atoi(data["age"])
 
 	user := models.User{
-		FirstName: data["first_name"],
-		LastName:  data["last_name"],
-		Image:     data["image"],
-		Age:       uint8(age),
-		Email:     data["email"],
+		FirstName: req.FirstName,
+		LastName:  req.LastName,
+		Image:     req.Image,
+		Age:       req.Age,
+		Email:     req.Email,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	user.SetPassword(data["password"])
+	user.SetPassword(req.Password)
 	h.Db.Create(&user)
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"data": user,
-	})
+	ctx.JSON(http.StatusOK, user)
 }
 
 func (h *AuthHandler) Login(ctx *gin.Context) {
