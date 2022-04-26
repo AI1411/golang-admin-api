@@ -49,6 +49,18 @@ func getAttribute(attribute string) string {
 		return "ユーザーID"
 	case "Status":
 		return "ステータス"
+	case "Age":
+		return "年齢"
+	case "Password":
+		return "パスワード"
+	case "Email":
+		return "メールアドレス"
+	case "PasswordConfirmation":
+		return "パスワード確認"
+	case "FirstName":
+		return "名"
+	case "LastName":
+		return "姓"
 	}
 	return attribute
 }

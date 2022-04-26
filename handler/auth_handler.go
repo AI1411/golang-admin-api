@@ -45,7 +45,9 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 	var req authRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		panic(err)
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
+		return
 	}
 
 	if req.Password != req.PasswordConfirmation {
@@ -71,15 +73,15 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 }
 
 func (h *AuthHandler) Login(ctx *gin.Context) {
-	var data map[string]string
+	var req loginRequest
 
-	if err := ctx.ShouldBindJSON(&data); err != nil {
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		panic(err)
 	}
 
 	var user models.User
 
-	err := h.Db.Where("email = ?", data["email"]).First(&user).Error
+	err := h.Db.Where("email = ?", req.Email).First(&user).Error
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		ctx.JSON(http.StatusNotFound, gin.H{
@@ -88,7 +90,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	if err = user.ComparePassword(data["password"]); err != nil {
+	if err = user.ComparePassword(req.Password); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"message": "パスワードが間違っています",
 		})
