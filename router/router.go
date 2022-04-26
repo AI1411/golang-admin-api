@@ -15,18 +15,23 @@ func Router() *gin.Engine {
 
 	r := gin.Default()
 	r.Use(cors.Default())
-	r.GET("/todos", todoHandler.GetAll)
-	r.GET("/todos/:id", todoHandler.GetDetail)
-	r.POST("/todos", todoHandler.CreateTodo)
-	r.PUT("/todos/:id", todoHandler.UpdateTodo)
-	r.DELETE("/todos/:id", todoHandler.DeleteTodo)
-
-	r.GET("/users", userHandler.GetAllUser)
-	r.GET("/users/:id", userHandler.GetUserDetail)
-	r.PUT("/users/:id", userHandler.UpdateUser)
-	r.DELETE("/users/:id", userHandler.DeleteUser)
-	r.PUT("/users/:id/uploadImage", userHandler.UploadUserImage)
-	r.POST("/users/exportCsv", userHandler.ExportCSV)
+	todos := r.Group("/todos")
+	{
+		todos.GET("", todoHandler.GetAll)
+		todos.GET("/:id", todoHandler.GetDetail)
+		todos.POST("", todoHandler.CreateTodo)
+		todos.PUT("/:id", todoHandler.UpdateTodo)
+		todos.DELETE("/:id", todoHandler.DeleteTodo)
+	}
+	users := r.Group("/users")
+	{
+		users.GET("", userHandler.GetAllUser)
+		users.GET("/:id", userHandler.GetUserDetail)
+		users.PUT("/:id", userHandler.UpdateUser)
+		users.DELETE("/:id", userHandler.DeleteUser)
+		users.PUT("/:id/uploadImage", userHandler.UploadUserImage)
+		users.POST("/exportCsv", userHandler.ExportCSV)
+	}
 
 	r.POST("register", authHandler.Register)
 	r.POST("login", authHandler.Login)

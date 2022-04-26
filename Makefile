@@ -8,4 +8,4 @@ fmt:
 	gofumpt -l -w .
 
 test:
-	richgo test ./... -v
+	go test ./... -v
