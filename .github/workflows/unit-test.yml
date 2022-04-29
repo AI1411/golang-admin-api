@@ -22,6 +22,9 @@ jobs:
       TZ: "Asia/Tokyo"
 
     steps:
+      - name sleep
+        run: sleep 5s
+
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
         with:
@@ -35,7 +38,10 @@ jobs:
         run: go get -u github.com/kyoh86/richgo
 
       - name: run migrations
-        run: go build main.go
+        run: |
+          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.0/migrate.linux-amd64,tar,gz | tar xvz
+          mv ./migrate.linux-amd64 /usr/bin/migrate
+          make migrate
 
       - name: Test
         run: make test

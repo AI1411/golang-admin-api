@@ -1,7 +1,6 @@
 package db
 
 import (
-	"github.com/AI1411/golang-admin-api/models"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
@@ -12,6 +11,5 @@ func Init() *gorm.DB {
 		panic("failed to connect db")
 	}
 	db.LogMode(false)
-	db.AutoMigrate(&models.Todo{}, &models.User{})
 	return db
 }
