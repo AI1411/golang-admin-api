@@ -38,11 +38,15 @@ func Router() *gin.Engine {
 		products.GET("", producthandler.GetAllProduct)
 		products.GET("/:id", producthandler.GetProductDetail)
 		products.POST("", producthandler.CreateProduct)
+		products.PUT("/:id", producthandler.UpdateProduct)
+		products.DELETE("/:id", producthandler.DeleteProduct)
 	}
-
-	r.POST("register", authHandler.Register)
-	r.POST("login", authHandler.Login)
-	r.GET("me", authHandler.Me)
+	auth := r.Group("/auth")
+	{
+		auth.POST("/login", authHandler.Login)
+		auth.POST("/register", authHandler.Register)
+		auth.GET("/me", authHandler.Me)
+	}
 
 	r.Run()
 

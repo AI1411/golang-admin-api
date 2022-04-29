@@ -74,6 +74,49 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 	return
 }
 
+func (h *ProductHandler) UpdateProduct(ctx *gin.Context) {
+	product := models.Product{}
+	id := ctx.Param("id")
+	if err := h.Db.Where("id = ?", id).First(&product).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("product not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
+		return
+	}
+	if err := ctx.ShouldBindJSON(&product); err != nil {
+		restErr := errors.NewBadRequestError("invalid request")
+		ctx.JSON(restErr.Status(), restErr)
+		return
+	}
+	if err := h.Db.Save(&product).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to update product", err))
+		return
+	}
+	ctx.JSON(http.StatusAccepted, product)
+}
+
+func (h *ProductHandler) DeleteProduct(ctx *gin.Context) {
+	product := models.Product{}
+	id := ctx.Param("id")
+	if err := h.Db.Where("id = ?", id).First(&product).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("product not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
+		return
+	}
+	if err := h.Db.Delete(&product).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to delete product", err))
+		return
+	}
+	ctx.JSON(http.StatusNoContent, nil)
+}
+
 func createProductQueryBuilder(params searchProductParams, h *ProductHandler) *gorm.DB {
 	var products []models.Product
 	query := h.Db.Find(&products)
