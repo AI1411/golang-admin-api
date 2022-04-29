@@ -22,7 +22,7 @@ jobs:
       TZ: "Asia/Tokyo"
 
     steps:
-      - name sleep
+      - name: sleep
         run: sleep 5s
 
       - name: Set up Go 1.x
