@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TestUpdateTodo in github.com/AI1411/golang-admin-api/handler" type="GoTestRunConfiguration" factoryName="Go Test" nameIsGenerated="true">
+    <module name="api" />
+    <working_directory value="$PROJECT_DIR$/handler" />
+    <root_directory value="$PROJECT_DIR$" />
+    <kind value="PACKAGE" />
+    <package value="github.com/AI1411/golang-admin-api/handler" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$" />
+    <framework value="gotest" />
+    <pattern value="^\QTestUpdateTodo\E$" />
+    <method v="2" />
+  </configuration>
+</component>
