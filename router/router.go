@@ -12,7 +12,8 @@ func Router() *gin.Engine {
 	todoHandler := handler.NewTodoHandler(dbConn)
 	userHandler := handler.NewUserHandler(dbConn)
 	authHandler := handler.NewAuthHandler(dbConn)
-	producthandler := handler.NewProductHandler(dbConn)
+	productHandler := handler.NewProductHandler(dbConn)
+	orderHandler := handler.NewOrderHandler(dbConn)
 
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -35,17 +36,21 @@ func Router() *gin.Engine {
 	}
 	products := r.Group("/products")
 	{
-		products.GET("", producthandler.GetAllProduct)
-		products.GET("/:id", producthandler.GetProductDetail)
-		products.POST("", producthandler.CreateProduct)
-		products.PUT("/:id", producthandler.UpdateProduct)
-		products.DELETE("/:id", producthandler.DeleteProduct)
+		products.GET("", productHandler.GetAllProduct)
+		products.GET("/:id", productHandler.GetProductDetail)
+		products.POST("", productHandler.CreateProduct)
+		products.PUT("/:id", productHandler.UpdateProduct)
+		products.DELETE("/:id", productHandler.DeleteProduct)
 	}
 	auth := r.Group("/auth")
 	{
 		auth.POST("/login", authHandler.Login)
 		auth.POST("/register", authHandler.Register)
 		auth.GET("/me", authHandler.Me)
+	}
+	orders := r.Group("/orders")
+	{
+		orders.POST("", orderHandler.CreateOrder)
 	}
 
 	r.Run()

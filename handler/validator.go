@@ -32,9 +32,10 @@ func createValidateErrorResponse(err error) *errorResponse {
 }
 
 func createValidationMessage(field string, tag string) string {
+	field = getAttribute(field)
 	switch tag {
 	case "required":
-		return getAttribute(field) + "は必須です"
+		return field + "は必須です"
 	}
 	return field + "は不正です"
 }
@@ -61,6 +62,16 @@ func getAttribute(attribute string) string {
 		return "名"
 	case "LastName":
 		return "姓"
+	case "OrderStatus":
+		return "注文ステータス"
+	case "OrderID":
+		return "注文ID"
+	case "Remarks":
+		return "備考"
+	case "Quantity":
+		return "数量"
+	case "TotalPrice":
+		return "合計金額"
 	}
 	return attribute
 }
