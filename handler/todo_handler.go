@@ -75,8 +75,8 @@ func (h *TodoHandler) UpdateTodo(ctx *gin.Context) {
 	id := ctx.Param("id")
 	h.Db.First(&todo, id)
 	if err := ctx.ShouldBindJSON(&todo); err != nil {
-		restErr := errors.NewBadRequestError("invalid request")
-		ctx.JSON(restErr.Status(), restErr)
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
 	h.Db.Save(&todo)
@@ -86,9 +86,13 @@ func (h *TodoHandler) UpdateTodo(ctx *gin.Context) {
 func (h TodoHandler) DeleteTodo(ctx *gin.Context) {
 	todo := models.Todo{}
 	id := ctx.Param("id")
-	if err := h.Db.First(&todo, id).Error; err != nil {
-		restErr := errors.NewBadRequestError("invalid request")
-		ctx.JSON(restErr.Status(), restErr)
+	if err := h.Db.Where("id = ?", id).First(&todo).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("todo not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
 		return
 	}
 	h.Db.Delete(&todo)
