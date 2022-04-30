@@ -85,23 +85,23 @@ var getTodosTestCases = []struct {
 			"details": [
 				{
 					"attribute": "Title",
-					"message": "Titleは不正です"
+					"message": "タイトルは不正です"
 				},
 				{
 					"attribute": "Body",
-					"message": "Bodyは不正です"
+					"message": "本文は不正です"
 				},
 				{
 					"attribute": "Status",
-					"message": "Statusは不正です"
+					"message": "ステータスは不正です"
 				},
  				{
-            		"attribute": "UserId",
-            		"message": "UserIdは不正です"
+            		"attribute": "UserID",
+            		"message": "ユーザーIDは不正です"
 				},
 				{
 					"attribute": "CreatedAt",
-					"message": "CreatedAtは不正です"
+					"message": "作成日時は不正です"
 				},
 				{
 					"attribute": "Offset",
@@ -330,15 +330,15 @@ var createTodoTestCases = []struct {
 			"details": [
 				{
 					"attribute": "Title",
-					"message": "Titleは不正です"
+					"message": "タイトルは不正です"
 				},
 				{
 					"attribute": "Body",
-					"message": "Bodyは不正です"
+					"message": "本文は不正です"
 				},
 				{
 					"attribute": "Status",
-					"message": "Statusは不正です"
+					"message": "ステータスは不正です"
 				},
  				{
             		"attribute": "UserID",
@@ -410,15 +410,15 @@ var updateTodoTestCases = []struct {
 			"details": [
 				{
 					"attribute": "Title",
-					"message": "Titleは不正です"
+					"message": "タイトルは不正です"
 				},
 				{
 					"attribute": "Body",
-					"message": "Bodyは不正です"
+					"message": "本文は不正です"
 				},
 				{
 					"attribute": "Status",
-					"message": "Statusは不正です"
+					"message": "ステータスは不正です"
 				},
  				{
             		"attribute": "UserID",

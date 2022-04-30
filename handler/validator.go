@@ -72,6 +72,10 @@ func getAttribute(attribute string) string {
 		return "数量"
 	case "TotalPrice":
 		return "合計金額"
+	case "CreatedAt":
+		return "作成日時"
+	case "UpdatedAt":
+		return "更新日時"
 	}
 	return attribute
 }

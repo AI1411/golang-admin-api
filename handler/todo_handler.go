@@ -20,7 +20,7 @@ type searchTodoPrams struct {
 	Title     *string `form:"title" binding:"omitempty,max=64"`
 	Body      *string `form:"body" binding:"omitempty,max=64"`
 	Status    *string `form:"status" binding:"omitempty,oneof=success waiting canceled processing done"`
-	UserId    *string `form:"user_id" binding:"omitempty,numeric,max=64"`
+	UserID    *string `form:"user_id" binding:"omitempty,numeric,max=64"`
 	CreatedAt string  `form:"created_at" binding:"omitempty,datetime"`
 	Offset    string  `form:"offset" binding:"omitempty,numeric"`
 	Limit     string  `form:"limit" binding:"omitempty,numeric"`
@@ -111,8 +111,8 @@ func createBaseQueryBuilder(param searchTodoPrams, h *TodoHandler) *gorm.DB {
 	if param.Status != nil {
 		query = query.Where("status = ?", param.Status)
 	}
-	if param.UserId != nil {
-		query = query.Where("user_id = ?", param.UserId)
+	if param.UserID != nil {
+		query = query.Where("user_id = ?", param.UserID)
 	}
 	if param.CreatedAt != "" {
 		query = query.Where("created_at = ?", param.CreatedAt)
