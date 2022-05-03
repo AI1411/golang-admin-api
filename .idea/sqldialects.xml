@@ -5,5 +5,6 @@
     <file url="file://$PROJECT_DIR$/db/migrations/20220429033700_create_users_table.up.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/db/migrations/20220429033706_create_todos_table.up.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/db/migrations/20220430021004_create_orders_table.up.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/db/migrations/20220430025734_create_order_details_table.up.sql" dialect="MySQL" />
   </component>
 </project>

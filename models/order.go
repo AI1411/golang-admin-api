@@ -19,7 +19,7 @@ const (
 )
 
 type Order struct {
-	ID          uuid.UUID   `json:"id"`
+	ID          string      `json:"id"`
 	UserId      int64       `json:"user_id" binding:"required,min=1"`
 	Quantity    int64       `json:"quantity" binding:"required,gte=1"`
 	TotalPrice  int64       `json:"total_price" binding:"required,min=0"`
@@ -30,5 +30,6 @@ type Order struct {
 }
 
 func (p *Order) CreateUUID() {
-	p.ID = uuid.New()
+	newUUID, _ := uuid.NewRandom()
+	p.ID = newUUID.String()
 }

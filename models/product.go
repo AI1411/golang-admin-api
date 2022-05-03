@@ -16,5 +16,6 @@ type Product struct {
 }
 
 func (p *Product) CreateUUID() {
-	p.ID = uuid.New()
+	newUUID, _ := uuid.NewRandom()
+	p.ID = newUUID
 }
