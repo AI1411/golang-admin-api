@@ -15,9 +15,17 @@ type OrderDetail struct {
 func (l *OrderDetailList) TotalPrice() int64 {
 	var totalPrice int64
 	for _, v := range *l {
-		totalPrice = v.Quantity * v.Price
+		totalPrice += v.Quantity * v.Price
 	}
 	return totalPrice
+}
+
+func (l *OrderDetailList) TotalQuantity() int64 {
+	var totalQuantity int64
+	for _, v := range *l {
+		totalQuantity += v.Quantity
+	}
+	return totalQuantity
 }
 
 func (d *OrderDetail) CreateUUID() {
