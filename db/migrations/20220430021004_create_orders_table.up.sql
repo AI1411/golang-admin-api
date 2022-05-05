@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS orders;
 CREATE TABLE orders
 (
     id           char(36) primary key                NOT NULL comment '注文ID',
-    user_id      varchar(64)                         NOT NULL comment 'ユーザID',
+    user_id      char(36)                            NOT NULL comment 'ユーザID',
     quantity     varchar(64)                         NOT NULL comment '数量',
     total_price  integer unsigned                    NOT NULL comment '合計金額',
     order_status varchar(64)                         NULL comment '注文ステータス',
