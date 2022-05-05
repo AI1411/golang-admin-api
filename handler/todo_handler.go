@@ -17,13 +17,13 @@ func NewTodoHandler(db *gorm.DB) *TodoHandler {
 }
 
 type searchTodoPrams struct {
-	Title     *string `form:"title" binding:"omitempty,max=64"`
-	Body      *string `form:"body" binding:"omitempty,max=64"`
-	Status    *string `form:"status" binding:"omitempty,oneof=success waiting canceled processing done"`
-	UserID    *string `form:"user_id" binding:"omitempty,numeric,max=64"`
-	CreatedAt string  `form:"created_at" binding:"omitempty,datetime"`
-	Offset    string  `form:"offset" binding:"omitempty,numeric"`
-	Limit     string  `form:"limit" binding:"omitempty,numeric"`
+	Title     string `form:"title" binding:"omitempty,max=64"`
+	Body      string `form:"body" binding:"omitempty,max=64"`
+	Status    string `form:"status" binding:"omitempty,oneof=success waiting canceled processing done"`
+	UserID    string `form:"user_id" binding:"omitempty,max=64"`
+	CreatedAt string `form:"created_at" binding:"omitempty,datetime"`
+	Offset    string `form:"offset" binding:"omitempty,numeric"`
+	Limit     string `form:"limit" binding:"omitempty,numeric"`
 }
 
 func (h *TodoHandler) GetAll(ctx *gin.Context) {
@@ -102,16 +102,16 @@ func (h TodoHandler) DeleteTodo(ctx *gin.Context) {
 func createBaseQueryBuilder(param searchTodoPrams, h *TodoHandler) *gorm.DB {
 	var todos []models.Todo
 	query := h.Db.Find(&todos)
-	if param.Title != nil {
-		query = query.Where("title LIKE ?", "%"+*param.Title+"%")
+	if param.Title != "" {
+		query = query.Where("title LIKE ?", "%"+param.Title+"%")
 	}
-	if param.Body != nil {
-		query = query.Where("body LIKE ?", "%"+*param.Body+"%")
+	if param.Body != "" {
+		query = query.Where("body LIKE ?", "%"+param.Body+"%")
 	}
-	if param.Status != nil {
+	if param.Status != "" {
 		query = query.Where("status = ?", param.Status)
 	}
-	if param.UserID != nil {
+	if param.UserID != "" {
 		query = query.Where("user_id = ?", param.UserID)
 	}
 	if param.CreatedAt != "" {

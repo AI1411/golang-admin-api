@@ -17,7 +17,7 @@ type Todo struct {
 	Title     string    `json:"title" binding:"required,max=64"`
 	Body      string    `json:"body" binding:"required,max=64"`
 	Status    string    `json:"status" binding:"required,oneof=success waiting canceled processing done"`
-	UserID    *uint64   `json:"user_id" binding:"required"`
+	UserID    *string   `json:"user_id" binding:"required"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

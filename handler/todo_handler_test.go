@@ -18,6 +18,10 @@ import (
 	"github.com/AI1411/golang-admin-api/util"
 )
 
+const (
+	testUserID = "e29aa01f-8df4-422e-8341-ec976be91f8d"
+)
+
 var getTodosTestCases = []struct {
 	tid        int
 	name       string
@@ -37,7 +41,7 @@ var getTodosTestCases = []struct {
 					"title": "test1",
 					"body": "body1",
 					"status": "success",
-					"user_id": 1,
+					"user_id": "e29aa01f-8df4-422e-8341-ec976be91f8d",
 					"created_at": "2022-03-26T21:34:52+09:00",
 					"updated_at": "2022-03-26T21:34:52+09:00"
 				},
@@ -46,7 +50,7 @@ var getTodosTestCases = []struct {
 					"title": "test2",
 					"body": "body2",
 					"status": "waiting",
-					"user_id": 2,
+					"user_id": "e29aa01f-8df4-422e-8341-ec976be91f8c",
 					"created_at": "2022-03-26T21:34:52+09:00",
 					"updated_at": "2022-03-26T21:34:52+09:00"
 				}
@@ -128,7 +132,7 @@ var getTodosTestCases = []struct {
 					"title": "test1",
 					"body": "body1",
 					"status": "success",
-					"user_id": 1,
+					"user_id": "e29aa01f-8df4-422e-8341-ec976be91f8d",
 					"created_at": "2022-03-26T21:34:52+09:00",
 					"updated_at": "2022-03-26T21:34:52+09:00"
 				}
@@ -150,7 +154,7 @@ var getTodosTestCases = []struct {
 					"title": "test1",
 					"body": "body1",
 					"status": "success",
-					"user_id": 1,
+					"user_id": "e29aa01f-8df4-422e-8341-ec976be91f8d",
 					"created_at": "2022-03-26T21:34:52+09:00",
 					"updated_at": "2022-03-26T21:34:52+09:00"
 				}
@@ -172,7 +176,7 @@ var getTodosTestCases = []struct {
 					"title": "test1",
 					"body": "body1",
 					"status": "success",
-					"user_id": 1,
+					"user_id": "e29aa01f-8df4-422e-8341-ec976be91f8d",
 					"created_at": "2022-03-26T21:34:52+09:00",
 					"updated_at": "2022-03-26T21:34:52+09:00"
 				}
@@ -184,7 +188,7 @@ var getTodosTestCases = []struct {
 		tid:  7,
 		name: "UserIDで検索",
 		request: map[string]interface{}{
-			"user_id": "1",
+			"user_id": testUserID,
 		},
 		wantStatus: http.StatusOK,
 		wantBody: `{
@@ -194,7 +198,7 @@ var getTodosTestCases = []struct {
 					"title": "test1",
 					"body": "body1",
 					"status": "success",
-					"user_id": 1,
+					"user_id": "e29aa01f-8df4-422e-8341-ec976be91f8d",
 					"created_at": "2022-03-26T21:34:52+09:00",
 					"updated_at": "2022-03-26T21:34:52+09:00"
 				}
@@ -207,7 +211,7 @@ var getTodosTestCases = []struct {
 func TestGetTodos(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE todos")
-	dbConn.Exec("insert into todos values (1, 'test1', 'body1', 'success', 1, '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 2, '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
+	dbConn.Exec("insert into todos values (1, 'test1', 'body1', 'success', 'e29aa01f-8df4-422e-8341-ec976be91f8d', '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 'e29aa01f-8df4-422e-8341-ec976be91f8c', '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
 	r := gin.New()
 	todoHandler := NewTodoHandler(dbConn)
 	r.GET("/todos", todoHandler.GetAll)
@@ -250,7 +254,7 @@ var getTodoDetailTestCases = []struct {
 				"title": "test1",
 				"body": "body1",
 				"status": "success",
-				"user_id": 1,
+				"user_id": "e29aa01f-8df4-422e-8341-ec976be91f8d",
 				"created_at": "2022-03-26T21:34:52+09:00",
 				"updated_at": "2022-03-26T21:34:52+09:00"
 		}`,
@@ -267,7 +271,7 @@ var getTodoDetailTestCases = []struct {
 func TestTodoDetail(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE todos")
-	dbConn.Exec("insert into todos values (1, 'test1', 'body1', 'success', 1, '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 2, '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
+	dbConn.Exec("insert into todos values (1, 'test1', 'body1', 'success', 'e29aa01f-8df4-422e-8341-ec976be91f8d', '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 2, '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
 	r := gin.New()
 	todoHandler := NewTodoHandler(dbConn)
 	r.GET("/todos/:id", todoHandler.GetDetail)
@@ -300,7 +304,7 @@ var createTodoTestCases = []struct {
 			"title":      "test",
 			"body":       "test",
 			"status":     "success",
-			"user_id":    1,
+			"user_id":    "e29aa01f-8df4-422e-8341-ec976be91f8d",
 			"created_at": "2022-01-01T00:00:00.880012+09:00",
 			"updated_at": "2022-01-01T00:00:00.880012+09:00",
 		},
@@ -310,7 +314,7 @@ var createTodoTestCases = []struct {
 			"title": "test",
 			"body": "test",
 			"status": "success",
-			"user_id": 1,
+			"user_id": "e29aa01f-8df4-422e-8341-ec976be91f8d",
 			"created_at": "2022-01-01T00:00:00.880012+09:00",
 			"updated_at": "2022-01-01T00:00:00.880012+09:00"
 		}`,
@@ -383,12 +387,12 @@ var updateTodoTestCases = []struct {
 	{
 		tid:    1,
 		name:   "TODOが正常に更新できること",
-		todoID: "1",
+		todoID: "e29aa01f-8df4-422e-8341-ec976be91f8q",
 		request: map[string]interface{}{
 			"title":   "updated",
 			"body":    "updated",
 			"status":  "waiting",
-			"user_id": 1,
+			"user_id": "e29aa01f-8df4-422e-8341-ec976be91f8d",
 		},
 		wantStatus:     http.StatusAccepted,
 		checkUpdatedAt: true,
@@ -432,7 +436,7 @@ var updateTodoTestCases = []struct {
 func TestUpdateTodo(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE todos")
-	dbConn.Exec("insert into todos values (1, 'test1', 'body1', 'success', 1, '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 2, '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
+	dbConn.Exec("insert into todos values ('e29aa01f-8df4-422e-8341-ec976be91f8q', 'test1', 'body1', 'success', 1, '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 2, '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
 	r := gin.New()
 	todoHandler := NewTodoHandler(dbConn)
 	r.PUT("/todos/:id", todoHandler.UpdateTodo)
@@ -456,7 +460,7 @@ func TestUpdateTodo(t *testing.T) {
 				assert.Equal(t, "updated", todo.Title)
 				assert.Equal(t, "updated", todo.Body)
 				assert.Equal(t, "waiting", todo.Status)
-				assert.Equal(t, util.Uint64ToPtr(1), todo.UserID)
+				assert.Equal(t, util.StringToPtr("e29aa01f-8df4-422e-8341-ec976be91f8d"), todo.UserID)
 			}
 		})
 	}
@@ -487,7 +491,7 @@ var deleteTodoTestCases = []struct {
 func TestDeleteTodo(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE todos")
-	dbConn.Exec("insert into todos values (1, 'test1', 'body1', 'success', 1, '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 2, '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
+	dbConn.Exec("insert into todos values (1, 'test1', 'body1', 'success', 'e29aa01f-8df4-422e-8341-ec976be91f8d', '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 'e29aa01f-8df4-422e-8341-ec976be91f8c', '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
 	r := gin.New()
 	todoHandler := NewTodoHandler(dbConn)
 	r.DELETE("/todos/:id", todoHandler.DeleteTodo)
