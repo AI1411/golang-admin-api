@@ -73,3 +73,7 @@ func NewInternalServerError(message string, err error) RestErr {
 	}
 	return result
 }
+
+func Is(err error, target error) bool {
+	return errors.Is(err, target)
+}
