@@ -37,13 +37,7 @@ func (h *OrderHandler) GetOrders(ctx *gin.Context) {
 
 	var orders []models.Order
 	query := createOrderQueryBuilder(params, h)
-	query.Find(&orders)
-
-	for i, order := range orders {
-		var orderDetails models.OrderDetailList
-		h.Db.Find(&orderDetails, "order_id = ?", order.ID)
-		orders[i].OrderDetails = orderDetails
-	}
+	query.Preload("OrderDetails").Find(&orders)
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"total":  len(orders),
@@ -54,7 +48,7 @@ func (h *OrderHandler) GetOrders(ctx *gin.Context) {
 func (h *OrderHandler) GetOrder(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var order models.Order
-	if err := h.Db.Where("id = ?", id).First(&order).Error; err != nil {
+	if err := h.Db.Preload("OrderDetails").Where("id = ?", id).First(&order).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			ctx.AbortWithStatusJSON(http.StatusNotFound, errors.NewNotFoundError("order not found"))
 			return
@@ -62,10 +56,6 @@ func (h *OrderHandler) GetOrder(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to get order", err))
 		return
 	}
-
-	var orderDetails models.OrderDetailList
-	h.Db.Find(&orderDetails, "order_id = ?", order.ID)
-	order.OrderDetails = orderDetails
 
 	ctx.JSON(http.StatusOK, order)
 }
