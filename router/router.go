@@ -52,6 +52,8 @@ func Router() *gin.Engine {
 	orders := r.Group("/orders")
 	{
 		orders.POST("", orderHandler.CreateOrder)
+		orders.GET("", orderHandler.GetOrders)
+		orders.GET("/:id", orderHandler.GetOrder)
 	}
 	orderDetails := r.Group("/orderDetails")
 	{
