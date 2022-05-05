@@ -1,17 +1,16 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
-	"strconv"
 	"time"
-
-	"github.com/AI1411/golang-admin-api/models"
-	util "github.com/AI1411/golang-admin-api/util/jwt"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+
+	"github.com/AI1411/golang-admin-api/models"
+	"github.com/AI1411/golang-admin-api/util/errors"
+	util "github.com/AI1411/golang-admin-api/util/jwt"
 )
 
 type Claims struct {
@@ -30,7 +29,6 @@ type authRequest struct {
 	LastName             string `json:"last_name" binding:"required"`
 	FirstName            string `json:"first_name" binding:"required"`
 	Age                  uint8  `json:"age" binding:"required"`
-	Image                string `json:"image" binding:"omitempty"`
 	Email                string `json:"email" binding:"required"`
 	Password             string `json:"password" binding:"required"`
 	PasswordConfirmation string `json:"password_confirmation" binding:"required"`
@@ -60,14 +58,17 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 	user := models.User{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
-		Image:     req.Image,
 		Age:       req.Age,
 		Email:     req.Email,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
+	user.CreateUUID()
 	user.SetPassword(req.Password)
-	h.Db.Create(&user)
+	if err := h.Db.Create(&user).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("user failed to register", err))
+		return
+	}
 
 	ctx.JSON(http.StatusOK, user)
 }
@@ -97,7 +98,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	token, err := util.GenerateJwt(strconv.Itoa(user.ID))
+	token, err := util.GenerateJwt(user.ID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"message": "認証に失敗しました",

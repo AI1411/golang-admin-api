@@ -67,21 +67,6 @@ func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 	})
 }
 
-func (h *UserHandler) UploadUserImage(ctx *gin.Context) {
-	user := models.User{}
-	id := ctx.Param("id")
-	if err := h.Db.First(&user, id).Error; err != nil {
-		restErr := errors.NewBadRequestError("invalid request")
-		ctx.JSON(restErr.Status(), restErr)
-		return
-	}
-	user.UploadImage(ctx)
-	h.Db.Save(&user)
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "画像がアップロードされました",
-	})
-}
-
 func (h *UserHandler) ExportCSV(ctx *gin.Context) {
 	fileName := time.Now().Format("202101011111") + "_users.csv"
 	filePath := "assets/csv/users/" + fileName
@@ -117,7 +102,7 @@ func (h *UserHandler) CreateFile(filepath string) error {
 
 	for _, user := range users {
 		data := []string{
-			strconv.Itoa(user.ID),
+			user.ID,
 			user.LastName,
 			user.FirstName,
 			user.Email,

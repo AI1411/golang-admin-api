@@ -32,7 +32,6 @@ func Router() *gin.Engine {
 		users.GET("/:id", userHandler.GetUserDetail)
 		users.PUT("/:id", userHandler.UpdateUser)
 		users.DELETE("/:id", userHandler.DeleteUser)
-		users.PUT("/:id/uploadImage", userHandler.UploadUserImage)
 		users.POST("/exportCsv", userHandler.ExportCSV)
 	}
 	products := r.Group("/products")
