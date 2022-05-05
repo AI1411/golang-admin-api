@@ -35,8 +35,15 @@ func (h *UserHandler) GetAllUser(ctx *gin.Context) {
 func (h *UserHandler) GetUserDetail(ctx *gin.Context) {
 	var user models.User
 	id := ctx.Param("id")
-	h.Db.Preload("Todos").Where("id = ?", id).Find(&user)
-
+	if err := h.Db.Preload("Todos").Where("id = ?", id).First(&user).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("user not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
+		return
+	}
 	ctx.JSON(http.StatusOK, user)
 }
 
