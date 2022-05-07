@@ -46,8 +46,28 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.Db.Table("coupon_user").Where("coupon_id = ? and user_id = ?", couponID, userID).First(&couponUser).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to find coupon_user", err))
+	var coupon models.Coupon
+	if err := h.Db.First(&coupon, "id = ?", couponID).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("coupon not found"))
+			return
+		}
+	}
+
+	var user models.User
+	if err := h.Db.First(&user, "id = ?", userID).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("user not found"))
+			return
+		}
+	}
+
+	if err := h.Db.Table("coupon_user").
+		Where("coupon_id = ? and user_id = ?", couponID, userID).
+		First(&couponUser).
+		Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError,
+			errors.NewInternalServerError("failed to find coupon_user", err))
 		return
 	}
 
@@ -57,7 +77,8 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 	}
 
 	if err := h.Db.Table("coupon_user").Create(&couponUser).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to acquire coupon", err))
+		ctx.JSON(http.StatusInternalServerError,
+			errors.NewInternalServerError("failed to acquire coupon", err))
 		return
 	}
 
