@@ -33,3 +33,33 @@ func (h *CouponHandler) CreateCoupon(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusCreated, coupon)
 }
+
+func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
+	var couponUser models.CouponUser
+	couponID := ctx.Param("coupon_id")
+	userID := ctx.Param("user_id")
+	couponUser.CouponID = couponID
+	couponUser.UserID = userID
+	if err := ctx.ShouldBindJSON(&couponUser); err != nil {
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
+		return
+	}
+
+	if err := h.Db.Table("coupon_user").Where("coupon_id = ? and user_id = ?", couponID, userID).First(&couponUser).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to find coupon_user", err))
+		return
+	}
+
+	if couponUser.UseCount == 0 {
+		ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("coupon already acquired"))
+		return
+	}
+
+	if err := h.Db.Table("coupon_user").Create(&couponUser).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to acquire coupon", err))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, couponUser)
+}

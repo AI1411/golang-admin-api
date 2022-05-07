@@ -62,6 +62,7 @@ func Router() *gin.Engine {
 	coupons := r.Group("/coupons")
 	{
 		coupons.POST("", couponHandler.CreateCoupon)
+		coupons.POST("/:coupon_id/users/:user_id", couponHandler.AcquireCoupon)
 	}
 
 	r.Run()
