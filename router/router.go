@@ -15,6 +15,7 @@ func Router() *gin.Engine {
 	productHandler := handler.NewProductHandler(dbConn)
 	orderHandler := handler.NewOrderHandler(dbConn)
 	orderDetailHandler := handler.NewOrderDetailHandler(dbConn)
+	couponHandler := handler.NewCouponHandler(dbConn)
 
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -57,6 +58,10 @@ func Router() *gin.Engine {
 	orderDetails := r.Group("/orderDetails")
 	{
 		orderDetails.POST("", orderDetailHandler.CreateOrderDetail)
+	}
+	coupons := r.Group("/coupons")
+	{
+		coupons.POST("", couponHandler.CreateCoupon)
 	}
 
 	r.Run()
