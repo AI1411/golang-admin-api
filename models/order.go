@@ -11,7 +11,7 @@ type OrderStatus string
 const (
 	OrderStatusNew           OrderStatus = "new"
 	OrderStatusPaid          OrderStatus = "paid"
-	OrderStatusCancelled     OrderStatus = "cancelled"
+	OrderStatusCanceled      OrderStatus = "canceled"
 	OrderStatusDelivered     OrderStatus = "delivered"
 	OrderStatusRefunded      OrderStatus = "refunded"
 	OrderStatusReturned      OrderStatus = "returned"
@@ -24,7 +24,7 @@ type Order struct {
 	UserID       int64           `json:"user_id" binding:"required,min=1"`
 	Quantity     int64           `json:"quantity"`
 	TotalPrice   int64           `json:"total_price"`
-	OrderStatus  OrderStatus     `json:"order_status" binding:"omitempty,oneof=new paid cancelled delivered refunded returned partially partially_paid"`
+	OrderStatus  OrderStatus     `json:"order_status" binding:"required,oneof=new paid cancelled delivered refunded returned partially partially_paid"`
 	Remarks      string          `json:"remarks" binding:"omitempty,max=255"`
 	OrderDetails OrderDetailList `json:"order_details" binding:"required"`
 	CreatedAt    time.Time       `json:"created_at"`

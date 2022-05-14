@@ -87,6 +87,7 @@ func (h *OrderHandler) CreateOrder(ctx *gin.Context) {
 		for _, detail := range order.OrderDetails {
 			detail.ID = order.CreateUUID()
 			detail.OrderID = orderData.ID
+			detail.OrderDetailStatus = models.OrderDetailStatusNew
 			orderData.OrderDetails = append(orderData.OrderDetails, detail)
 			if err := tx.Create(&detail).Error; err != nil {
 				ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to create order detail", err))
