@@ -1,9 +1,9 @@
 package models
 
 import (
-	"github.com/google/uuid"
 	"time"
 
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 

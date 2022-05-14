@@ -1,12 +1,14 @@
 package handler
 
 import (
-	"github.com/AI1411/golang-admin-api/models"
-	"github.com/AI1411/golang-admin-api/util/errors"
-	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/gorm"
 	"net/http"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/gorm"
+
+	"github.com/AI1411/golang-admin-api/models"
+	"github.com/AI1411/golang-admin-api/util/errors"
 )
 
 type OrderHandler struct {
@@ -98,7 +100,6 @@ func (h *OrderHandler) CreateOrder(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, orderData)
-	return
 }
 
 func createOrderQueryBuilder(params searchOrderPrams, h *OrderHandler) *gorm.DB {

@@ -1,11 +1,13 @@
 package handler
 
 import (
-	"github.com/AI1411/golang-admin-api/models"
-	"github.com/AI1411/golang-admin-api/util/errors"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"net/http"
+
+	"github.com/AI1411/golang-admin-api/models"
+	"github.com/AI1411/golang-admin-api/util/errors"
 )
 
 type TodoHandler struct {
@@ -67,7 +69,6 @@ func (h *TodoHandler) CreateTodo(ctx *gin.Context) {
 	}
 	h.Db.Create(&todo)
 	ctx.JSON(http.StatusCreated, todo)
-	return
 }
 
 func (h *TodoHandler) UpdateTodo(ctx *gin.Context) {

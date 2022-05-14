@@ -103,9 +103,11 @@ func (h *UserHandler) CreateFile(filepath string) error {
 
 	h.Db.Find(&users)
 
-	writer.Write([]string{
+	if err := writer.Write([]string{
 		"ID", "LastName", "FirstName", "Email", "Age",
-	})
+	}); err != nil {
+		return err
+	}
 
 	for _, user := range users {
 		data := []string{

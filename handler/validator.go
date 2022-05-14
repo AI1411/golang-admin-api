@@ -2,8 +2,9 @@ package handler
 
 import (
 	"errors"
-	"github.com/go-playground/validator/v10"
 	"net/http"
+
+	"github.com/go-playground/validator/v10"
 )
 
 func createValidateErrorResponse(err error) *errorResponse {

@@ -65,7 +65,9 @@ func Router() *gin.Engine {
 		coupons.POST("/:coupon_id/users/:user_id", couponHandler.AcquireCoupon)
 	}
 
-	r.Run()
+	if err := r.Run(); err != nil {
+		panic(err)
+	}
 
 	return r
 }

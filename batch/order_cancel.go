@@ -35,5 +35,7 @@ func run(args []string) error {
 }
 
 func main() {
-	run(os.Args)
+	if err := run(os.Args); err != nil {
+		log.Fatal(err)
+	}
 }

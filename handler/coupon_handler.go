@@ -81,5 +81,4 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, couponUser)
-	return
 }

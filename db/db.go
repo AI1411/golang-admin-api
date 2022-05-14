@@ -2,6 +2,7 @@ package db
 
 import (
 	"github.com/jinzhu/gorm"
+	// コメント書かないとLintエラーになる
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
