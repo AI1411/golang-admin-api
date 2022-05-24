@@ -16,6 +16,7 @@ func Router() *gin.Engine {
 	orderHandler := handler.NewOrderHandler(dbConn)
 	orderDetailHandler := handler.NewOrderDetailHandler(dbConn)
 	couponHandler := handler.NewCouponHandler(dbConn)
+	qrcodeHandler := handler.NewQrcodeHandler(dbConn)
 
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -64,6 +65,8 @@ func Router() *gin.Engine {
 		coupons.POST("", couponHandler.CreateCoupon)
 		coupons.POST("/:coupon_id/users/:user_id", couponHandler.AcquireCoupon)
 	}
+
+	r.GET("/qrcode", qrcodeHandler.GenerateQrcode)
 
 	if err := r.Run(); err != nil {
 		panic(err)

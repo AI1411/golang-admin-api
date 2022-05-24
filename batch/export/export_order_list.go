@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/csv"
-	"errors"
 	"fmt"
+	"github.com/AI1411/golang-admin-api/util"
 	"log"
 	"os"
 	"strconv"
@@ -26,7 +26,7 @@ func export(args []string) error {
 			fileDir := "assets/csv/orders/" + strconv.Itoa(year) +
 				"/" + strconv.Itoa(int(month)) + "/" + strconv.Itoa(day) + "/"
 
-			checkDir(fileDir)
+			util.CheckDir(fileDir)
 
 			filePath := fileDir + fileName
 
@@ -43,19 +43,6 @@ func export(args []string) error {
 		log.Fatal(err)
 	}
 
-	return nil
-}
-
-func checkDir(fileDir string) error {
-	_, err := os.Stat(fileDir)
-	if os.IsNotExist(err) {
-		os.MkdirAll(fileDir, 0o777)
-		return errors.New("ディレクトリを作成しました。")
-	}
-
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
