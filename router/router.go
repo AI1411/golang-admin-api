@@ -17,6 +17,7 @@ func Router() *gin.Engine {
 	orderDetailHandler := handler.NewOrderDetailHandler(dbConn)
 	couponHandler := handler.NewCouponHandler(dbConn)
 	qrcodeHandler := handler.NewQrcodeHandler(dbConn)
+	userGroupHandler := handler.NewUserGroupHandler(dbConn)
 
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -64,6 +65,10 @@ func Router() *gin.Engine {
 	{
 		coupons.POST("", couponHandler.CreateCoupon)
 		coupons.POST("/:coupon_id/users/:user_id", couponHandler.AcquireCoupon)
+	}
+	userGroups := r.Group("/userGroups")
+	{
+		userGroups.GET("", userGroupHandler.GetAllUserGroups)
 	}
 
 	r.GET("/qrcode", qrcodeHandler.GenerateQrcode)
