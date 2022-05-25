@@ -6,7 +6,7 @@ import (
 )
 
 type UserGroup struct {
-	Id        string    `json:"id"`
+	ID        string    `json:"id"`
 	GroupName string    `json:"group_name" binding:"required"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -14,5 +14,5 @@ type UserGroup struct {
 
 func (u *UserGroup) CreateUUID() {
 	newUUID, _ := uuid.NewRandom()
-	u.Id = newUUID.String()
+	u.ID = newUUID.String()
 }
