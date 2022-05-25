@@ -69,6 +69,7 @@ func Router() *gin.Engine {
 	userGroups := r.Group("/userGroups")
 	{
 		userGroups.GET("", userGroupHandler.GetAllUserGroups)
+		userGroups.POST("", userGroupHandler.CreateUserGroup)
 	}
 
 	r.GET("/qrcode", qrcodeHandler.GenerateQrcode)

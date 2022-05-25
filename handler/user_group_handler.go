@@ -1,10 +1,13 @@
 package handler
 
 import (
-	"github.com/AI1411/golang-admin-api/models"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"net/http"
+
+	"github.com/AI1411/golang-admin-api/models"
+	"github.com/AI1411/golang-admin-api/util/errors"
 )
 
 type UserGroupHandler struct {
@@ -31,6 +34,23 @@ func (h *UserGroupHandler) GetAllUserGroups(ctx *gin.Context) {
 	query := createUserGroupQueryBuilder(params, h)
 	query.Find(&userGroups)
 	ctx.JSON(http.StatusOK, userGroups)
+}
+
+func (h *UserGroupHandler) CreateUserGroup(ctx *gin.Context) {
+	userGroup := models.UserGroup{}
+	if err := ctx.ShouldBindJSON(&userGroup); err != nil {
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
+		return
+	}
+
+	userGroup.CreateUUID()
+	if err := h.Db.Create(&userGroup).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("Failed to create user group", err))
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, userGroup)
 }
 
 func createUserGroupQueryBuilder(param searchUserGroupParams, h *UserGroupHandler) *gorm.DB {
