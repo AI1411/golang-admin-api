@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS user_groups;
 CREATE TABLE user_groups
 (
     id         char(36)                            NOT NULL comment 'ID',
+    group_name varchar(64)                         NOT NULL comment 'グループ名',
     user_id    char(36)                            NOT NULL comment 'ユーザID',
     created_at timestamp default current_timestamp NOT NULL comment '作成日時',
     updated_at timestamp default current_timestamp NOT NULL comment '更新日時',
