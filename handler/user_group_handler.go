@@ -36,7 +36,42 @@ func (h *UserGroupHandler) GetAllUserGroups(ctx *gin.Context) {
 
 	var userGroups []models.UserGroup
 	query := createUserGroupQueryBuilder(params, h)
-	query.Find(&userGroups)
+	if err := h.Db.Transaction(func(tx *gorm.DB) error {
+		if err := query.Find(&userGroups).Error; err != nil {
+			ctx.JSON(http.StatusInternalServerError,
+				errors.NewInternalServerError("failed to get user groups", err))
+			return err
+		}
+		var groupUser []models.GroupUser
+		if err := tx.Table("group_user").Find(&groupUser).Error; err != nil {
+			ctx.JSON(http.StatusInternalServerError,
+				errors.NewInternalServerError("failed to get user groups", err))
+			return err
+		}
+		for i, group := range userGroups {
+			var userIDs []string
+			for _, user := range groupUser {
+				if group.ID == user.GroupID {
+					userIDs = append(userIDs, user.UserID)
+				}
+			}
+			var users []models.User
+			if err := tx.Table("users").Where("id in (?)", userIDs).Find(&users).Error; err != nil {
+				ctx.JSON(http.StatusInternalServerError,
+					errors.NewInternalServerError("failed to get user groups", err))
+				return err
+			}
+			if len(users) > 0 {
+				group.Users = users
+			}
+			userGroups[i] = group
+		}
+		return nil
+	}); err != nil {
+		ctx.JSON(http.StatusInternalServerError,
+			errors.NewInternalServerError("failed to get user groups or group user", err))
+		return
+	}
 	ctx.JSON(http.StatusOK, userGroups)
 }
 

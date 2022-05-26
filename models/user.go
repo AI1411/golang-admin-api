@@ -21,6 +21,8 @@ type User struct {
 	Todos     []Todo    `json:"todos" binding:"omitempty"`
 }
 
+type Users []User
+
 func (u *User) SetPassword(password string) {
 	hashPassword, _ := bcrypt.GenerateFromPassword([]byte(password), DefaultPasswordCost)
 
