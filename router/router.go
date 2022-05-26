@@ -69,6 +69,7 @@ func Router() *gin.Engine {
 	userGroups := r.Group("/userGroups")
 	{
 		userGroups.GET("", userGroupHandler.GetAllUserGroups)
+		userGroups.GET("/:id", userGroupHandler.GetUserGroupsDetail)
 		userGroups.POST("", userGroupHandler.CreateUserGroup)
 	}
 
