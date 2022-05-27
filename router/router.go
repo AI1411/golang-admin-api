@@ -19,6 +19,7 @@ func Router() *gin.Engine {
 	qrcodeHandler := handler.NewQrcodeHandler(dbConn)
 	userGroupHandler := handler.NewUserGroupHandler(dbConn)
 	milestoneHandler := handler.NewMilestoneHandler(dbConn)
+	epicHandler := handler.NewEpicHandler(dbConn)
 
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -77,6 +78,11 @@ func Router() *gin.Engine {
 	{
 		milestones.POST("", milestoneHandler.CreateMilestone)
 		milestones.PUT("/:id", milestoneHandler.UpdateMileStone)
+	}
+	epics := r.Group("/epics")
+	{
+		epics.POST("", epicHandler.CreateEpic)
+		epics.PUT("/:id", epicHandler.UpdateEpic)
 	}
 
 	r.GET("/qrcode", qrcodeHandler.GenerateQrcode)
