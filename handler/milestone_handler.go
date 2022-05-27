@@ -33,7 +33,7 @@ func (h *MilestoneHandler) CreateMilestone(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, milestone)
 }
 
-func (h MilestoneHandler) UpdateMileStone(ctx *gin.Context) {
+func (h *MilestoneHandler) UpdateMileStone(ctx *gin.Context) {
 	var milestone models.Milestone
 	id := ctx.Param("id")
 	if err := h.Db.Where("id = ?", id).First(&milestone).Error; err != nil {
