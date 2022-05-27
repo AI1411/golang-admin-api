@@ -81,6 +81,8 @@ func Router() *gin.Engine {
 	}
 	epics := r.Group("/epics")
 	{
+		epics.GET("", epicHandler.GetEpics)
+		epics.GET("/:id", epicHandler.GetEpicDetail)
 		epics.POST("", epicHandler.CreateEpic)
 		epics.PUT("/:id", epicHandler.UpdateEpic)
 	}
