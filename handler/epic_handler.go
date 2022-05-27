@@ -43,7 +43,7 @@ func (h *EpicHandler) GetEpics(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, epics)
 }
 
-func (h EpicHandler) GetEpicDetail(ctx *gin.Context) {
+func (h *EpicHandler) GetEpicDetail(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var epic models.Epic
 	if err := h.Db.Where("id = ?", id).First(&epic).Error; err != nil {
