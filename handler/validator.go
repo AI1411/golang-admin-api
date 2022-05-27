@@ -73,6 +73,10 @@ func getAttribute(attribute string) string {
 		return "数量"
 	case "TotalPrice":
 		return "合計金額"
+	case "MilestoneTitle":
+		return "タイトル"
+	case "ProjectID":
+		return "プロジェクトID"
 	case "CreatedAt":
 		return "作成日時"
 	case "UpdatedAt":
