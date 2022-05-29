@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/jinzhu/gorm"
 
 	"github.com/AI1411/golang-admin-api/models"
@@ -20,13 +19,13 @@ func NewProductHandler(db *gorm.DB) *ProductHandler {
 }
 
 type searchProductParams struct {
-	ProductID   *uuid.UUID `json:"product_id"`
-	ProductName *string    `json:"product_name"`
-	Price       *string    `json:"price"`
-	Remarks     *string    `json:"remarks"`
-	Quantity    *string    `json:"quantity"`
-	Offset      string     `json:"offset"`
-	Limit       string     `json:"limit"`
+	ProductID   string `form:"product_id"`
+	ProductName string `form:"product_name"`
+	Price       string `form:"price"`
+	Remarks     string `form:"remarks"`
+	Quantity    string `form:"quantity"`
+	Offset      string `form:"offset"`
+	Limit       string `form:"limit"`
 }
 
 func (h *ProductHandler) GetAllProduct(ctx *gin.Context) {
@@ -38,7 +37,10 @@ func (h *ProductHandler) GetAllProduct(ctx *gin.Context) {
 	}
 	var products []models.Product
 	query := createProductQueryBuilder(params, h)
-	query.Find(&products)
+	if err := query.Find(&products).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to get products", err))
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"total":    len(products),
 		"products": products,
@@ -122,20 +124,20 @@ func createProductQueryBuilder(params searchProductParams, h *ProductHandler) *g
 	var products []models.Product
 	query := h.Db.Find(&products)
 
-	if params.ProductID != nil {
+	if params.ProductID != "" {
 		query = query.Where("product_id = ?", params.ProductID)
 	}
-	if params.ProductName != nil {
-		query = query.Where("product_name LIKE ?", "%"+*params.ProductName+"%")
+	if params.ProductName != "" {
+		query = query.Where("product_name LIKE ?", "%"+params.ProductName+"%")
 	}
-	if params.Price != nil {
-		query = query.Where("price = ?", *params.Price)
+	if params.Price != "" {
+		query = query.Where("price = ?", params.Price)
 	}
-	if params.Remarks != nil {
-		query = query.Where("remarks LIKE ?", "%"+*params.Remarks+"%")
+	if params.Remarks != "" {
+		query = query.Where("remarks LIKE ?", "%"+params.Remarks+"%")
 	}
-	if params.Quantity != nil {
-		query = query.Where("quantity = ?", *params.Quantity)
+	if params.Quantity != "" {
+		query = query.Where("quantity = ?", params.Quantity)
 	}
 	if params.Offset != "" {
 		query = query.Offset(params.Offset)
