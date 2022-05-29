@@ -109,6 +109,7 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 	ctx.SetCookie("jwt", token, 3600, "/", "localhost", false, true)
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "認証に成功しました",
+		"value":   token,
 	})
 }
 
