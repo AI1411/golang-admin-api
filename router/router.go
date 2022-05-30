@@ -52,7 +52,7 @@ func Router() *gin.Engine {
 	{
 		auth.POST("/login", authHandler.Login)
 		auth.POST("/register", authHandler.Register)
-		auth.GET("/me", authHandler.Me)
+		auth.POST("/me", authHandler.Me)
 	}
 	orders := r.Group("/orders")
 	{
