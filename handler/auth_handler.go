@@ -39,6 +39,10 @@ type loginRequest struct {
 	Password string `json:"password"`
 }
 
+type meRequest struct {
+	JwtToken string `json:"jwt_token" binding:"required"`
+}
+
 func (h *AuthHandler) Register(ctx *gin.Context) {
 	var req authRequest
 
@@ -109,13 +113,20 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 	ctx.SetCookie("jwt", token, 3600, "/", "localhost", false, true)
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "認証に成功しました",
+		"value":   token,
+		"user":    user,
 	})
 }
 
 func (h *AuthHandler) Me(ctx *gin.Context) {
-	cookie, _ := ctx.Cookie("jwt")
+	var req meRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
+		return
+	}
 
-	id, _ := util.ParseJwt(cookie)
+	id, _ := util.ParseJwt(req.JwtToken)
 
 	var user models.User
 

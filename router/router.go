@@ -20,6 +20,7 @@ func Router() *gin.Engine {
 	userGroupHandler := handler.NewUserGroupHandler(dbConn)
 	milestoneHandler := handler.NewMilestoneHandler(dbConn)
 	epicHandler := handler.NewEpicHandler(dbConn)
+	projectHandler := handler.NewProjectHandler(dbConn)
 
 	r := gin.Default()
 	r.Use(cors.Default())
@@ -51,7 +52,7 @@ func Router() *gin.Engine {
 	{
 		auth.POST("/login", authHandler.Login)
 		auth.POST("/register", authHandler.Register)
-		auth.GET("/me", authHandler.Me)
+		auth.POST("/me", authHandler.Me)
 	}
 	orders := r.Group("/orders")
 	{
@@ -85,6 +86,14 @@ func Router() *gin.Engine {
 		epics.GET("/:id", epicHandler.GetEpicDetail)
 		epics.POST("", epicHandler.CreateEpic)
 		epics.PUT("/:id", epicHandler.UpdateEpic)
+	}
+	projects := r.Group("/projects")
+	{
+		projects.GET("", projectHandler.GetProjects)
+		projects.GET("/:id", projectHandler.GetProjectDetail)
+		projects.POST("", projectHandler.CreateProject)
+		projects.PUT("/:id", projectHandler.UpdateProject)
+		projects.DELETE("/:id", projectHandler.DeleteProject)
 	}
 
 	r.GET("/qrcode", qrcodeHandler.GenerateQrcode)
