@@ -12,5 +12,6 @@
     <file url="file://$PROJECT_DIR$/db/migrations/20220524222257_create_group_user_table.up.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/db/migrations/20220526215739_create_epics_table.up.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/db/migrations/20220526223130_create_milestones_table.up.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/db/migrations/20220528005347_create_projects_table.up.sql" dialect="MySQL" />
   </component>
 </project>

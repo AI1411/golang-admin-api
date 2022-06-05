@@ -50,25 +50,44 @@ func (h *UserHandler) GetUserDetail(ctx *gin.Context) {
 func (h *UserHandler) UpdateUser(ctx *gin.Context) {
 	user := models.User{}
 	id := ctx.Param("id")
-	h.Db.First(&user, id)
-	if err := ctx.ShouldBindJSON(&user); err != nil {
-		restErr := errors.NewBadRequestError("invalid request")
-		ctx.JSON(restErr.Status(), restErr)
+	if err := h.Db.Where("id = ?", id).First(&user).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("user not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
 		return
 	}
-	h.Db.Save(&user)
+	if err := ctx.ShouldBindJSON(&user); err != nil {
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
+		return
+	}
+
+	if err := h.Db.Save(&user).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to update user", err))
+		return
+	}
 	ctx.JSON(http.StatusAccepted, user)
 }
 
 func (h *UserHandler) DeleteUser(ctx *gin.Context) {
 	user := models.User{}
 	id := ctx.Param("id")
-	if err := h.Db.First(&user, id).Error; err != nil {
-		restErr := errors.NewBadRequestError("invalid request")
-		ctx.JSON(restErr.Status(), restErr)
+	if err := h.Db.Where("id = ?", id).First(&user).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("product not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
 		return
 	}
-	h.Db.Delete(&user)
+	if err := h.Db.Delete(&user).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to delete user", err))
+		return
+	}
 	ctx.JSON(http.StatusNoContent, gin.H{
 		"message": "削除されました",
 	})
