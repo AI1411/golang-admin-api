@@ -139,18 +139,13 @@ func (h *OrderHandler) DeleteOrder(ctx *gin.Context) {
 		}
 		return
 	}
-	if err := ctx.ShouldBindJSON(&order); err != nil {
-		res := createValidateErrorResponse(err)
-		ctx.AbortWithStatusJSON(res.Code, res)
+
+	if err := h.Db.Delete(&order).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to delete order", err))
 		return
 	}
 
-	if err := h.Db.Save(&order).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to update order", err))
-		return
-	}
-
-	ctx.JSON(http.StatusAccepted, order)
+	ctx.JSON(http.StatusNoContent, nil)
 }
 
 func createOrderQueryBuilder(params searchOrderPrams, h *OrderHandler) *gorm.DB {
