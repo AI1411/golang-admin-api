@@ -42,8 +42,56 @@ func (h *OrderDetailHandler) CreateOrderDetail(ctx *gin.Context) {
 	}
 	orderDetail.CreateUUID()
 	if err := h.Db.Create(&orderDetail).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to create order detail", err))
+		ctx.JSON(http.StatusInternalServerError,
+			errors.NewInternalServerError("failed to create order detail", err))
 		return
 	}
 	ctx.JSON(http.StatusCreated, orderDetail)
+}
+
+func (h *OrderDetailHandler) UpdateOrderDetail(ctx *gin.Context) {
+	var orderDetail models.OrderDetail
+	id := ctx.Param("id")
+	if err := h.Db.Where("id = ?", id).First(&orderDetail).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("order detail not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
+		return
+	}
+	if err := ctx.ShouldBindJSON(&orderDetail); err != nil {
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
+		return
+	}
+
+	if err := h.Db.Save(&orderDetail).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError,
+			errors.NewInternalServerError("failed to update order detail", err))
+		return
+	}
+
+	ctx.JSON(http.StatusAccepted, orderDetail)
+}
+
+func (h *OrderDetailHandler) DeleteOrderDetail(ctx *gin.Context) {
+	orderDetail := models.OrderDetail{}
+	id := ctx.Param("id")
+	if err := h.Db.Where("id = ?", id).First(&orderDetail).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("order detail not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
+		return
+	}
+	if err := h.Db.Delete(&orderDetail).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError,
+			errors.NewInternalServerError("failed to delete order detail", err))
+		return
+	}
+	ctx.JSON(http.StatusNoContent, nil)
 }

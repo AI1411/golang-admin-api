@@ -66,6 +66,8 @@ func Router() *gin.Engine {
 	{
 		orderDetails.GET("/:id", orderDetailHandler.GetOrderDetail)
 		orderDetails.POST("", orderDetailHandler.CreateOrderDetail)
+		orderDetails.PUT("/:id", orderDetailHandler.UpdateOrderDetail)
+		orderDetails.DELETE("/:id", orderDetailHandler.DeleteOrderDetail)
 	}
 	coupons := r.Group("/coupons")
 	{
