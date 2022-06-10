@@ -436,7 +436,7 @@ var updateTodoTestCases = []struct {
 func TestUpdateTodo(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE todos")
-	dbConn.Exec("insert into todos values ('e29aa01f-8df4-422e-8341-ec976be91f8q', 'test1', 'body1', 'success', 1, '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 2, '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
+	dbConn.Exec("insert into todos values ('e29aa01f-8df4-422e-8341-ec976be91f8q', 'test1', 'body1', 'success', 'e29aa01f-8df4-422e-8341-ec976be91f81', '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 'e29aa01f-8df4-422e-8341-ec976be91f82', '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
 	r := gin.New()
 	todoHandler := NewTodoHandler(dbConn)
 	r.PUT("/todos/:id", todoHandler.UpdateTodo)

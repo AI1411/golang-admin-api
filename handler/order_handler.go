@@ -103,6 +103,51 @@ func (h *OrderHandler) CreateOrder(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, orderData)
 }
 
+func (h *OrderHandler) UpdateOrder(ctx *gin.Context) {
+	order := models.Order{}
+	id := ctx.Param("id")
+	if err := h.Db.Where("id = ?", id).First(&order).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("order not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
+		return
+	}
+	if err := ctx.ShouldBindJSON(&order); err != nil {
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
+		return
+	}
+	if err := h.Db.Save(&order).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to update order", err))
+		return
+	}
+	ctx.JSON(http.StatusAccepted, order)
+}
+
+func (h *OrderHandler) DeleteOrder(ctx *gin.Context) {
+	var order models.Order
+	id := ctx.Param("id")
+	if err := h.Db.Where("id = ?", id).First(&order).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("order not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
+		return
+	}
+
+	if err := h.Db.Delete(&order).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to delete order", err))
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
+}
+
 func createOrderQueryBuilder(params searchOrderPrams, h *OrderHandler) *gorm.DB {
 	var orders []models.Order
 	query := h.Db.Find(&orders)

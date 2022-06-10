@@ -79,7 +79,7 @@ func createCsvFile(filePath string) error {
 	for _, order := range orders {
 		if err := writer.Write([]string{
 			order.ID,
-			strconv.Itoa(int(order.UserID)),
+			order.UserID,
 			strconv.Itoa(int(order.Quantity)),
 			strconv.Itoa(int(order.TotalPrice)),
 			string(order.OrderStatus),
