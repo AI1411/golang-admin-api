@@ -18,6 +18,21 @@ func NewOrderDetailHandler(db *gorm.DB) *OrderDetailHandler {
 	return &OrderDetailHandler{Db: db}
 }
 
+func (h *OrderDetailHandler) GetOrderDetail(ctx *gin.Context) {
+	id := ctx.Param("id")
+	var orderDetail models.OrderDetail
+	if err := h.Db.Where("id = ?", id).First(&orderDetail).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("order detail not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
+		return
+	}
+	ctx.JSON(http.StatusOK, orderDetail)
+}
+
 func (h *OrderDetailHandler) CreateOrderDetail(ctx *gin.Context) {
 	orderDetail := models.OrderDetail{}
 	if err := ctx.ShouldBindJSON(&orderDetail); err != nil {
