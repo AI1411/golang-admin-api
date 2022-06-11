@@ -119,15 +119,20 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 }
 
 func (h *AuthHandler) Me(ctx *gin.Context) {
-	cookie, err := ctx.Cookie("jwt")
-	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
-		return
-	}
+	cookie := ctx.Request.Header.Get("Cookie")
 
 	id, err := util.ParseJwt(cookie)
 	if err != nil {
-		ctx.Status(http.StatusUnauthorized)
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "unauthorized!",
+		})
+		return
+	}
+
+	if id == "" {
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"message": "unauthorized!",
+		})
 		return
 	}
 
