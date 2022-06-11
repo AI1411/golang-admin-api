@@ -74,7 +74,7 @@ func (h *OrderHandler) CreateOrder(ctx *gin.Context) {
 		UserID:      order.UserID,
 		Quantity:    order.OrderDetails.TotalQuantity(),
 		TotalPrice:  order.OrderDetails.TotalPrice(),
-		OrderStatus: models.OrderStatusNew,
+		OrderStatus: order.OrderStatus,
 		Remarks:     order.Remarks,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
@@ -87,7 +87,6 @@ func (h *OrderHandler) CreateOrder(ctx *gin.Context) {
 		for _, detail := range order.OrderDetails {
 			detail.ID = order.CreateUUID()
 			detail.OrderID = orderData.ID
-			detail.OrderDetailStatus = models.OrderDetailStatusNew
 			orderData.OrderDetails = append(orderData.OrderDetails, detail)
 			if err := tx.Create(&detail).Error; err != nil {
 				ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to create order detail", err))
@@ -150,7 +149,7 @@ func (h *OrderHandler) DeleteOrder(ctx *gin.Context) {
 
 func createOrderQueryBuilder(params searchOrderPrams, h *OrderHandler) *gorm.DB {
 	var orders []models.Order
-	query := h.Db.Find(&orders)
+	query := h.Db.Order("created_at desc").Find(&orders)
 	if params.ID != nil {
 		query = query.Where("id = ?", *params.ID)
 	}
