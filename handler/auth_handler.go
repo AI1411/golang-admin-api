@@ -119,18 +119,29 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 }
 
 func (h *AuthHandler) Me(ctx *gin.Context) {
-	var req meRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		res := createValidateErrorResponse(err)
-		ctx.AbortWithStatusJSON(res.Code, res)
+	cookie, err := ctx.Cookie("jwt")
+	if err != nil {
+		ctx.Status(http.StatusUnauthorized)
 		return
 	}
 
-	id, _ := util.ParseJwt(req.JwtToken)
+	id, err := util.ParseJwt(cookie)
+	if err != nil {
+		ctx.Status(http.StatusUnauthorized)
+		return
+	}
 
 	var user models.User
 
-	h.Db.Where("id = ?", id).First(&user)
+	if err := h.Db.Where("id = ?", id).First(&user).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			ctx.AbortWithStatusJSON(http.StatusNotFound, errors.NewNotFoundError("user not found"))
+			return
+		}
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError,
+			errors.NewInternalServerError("failed to get user", err))
+		return
+	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "its me!",
