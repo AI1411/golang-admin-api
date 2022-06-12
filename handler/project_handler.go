@@ -24,7 +24,10 @@ func (h *ProjectHandler) GetProjects(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to get epics", err))
 		return
 	}
-	ctx.JSON(http.StatusOK, projects)
+	ctx.JSON(http.StatusOK, gin.H{
+		"total":    len(projects),
+		"projects": projects,
+	})
 }
 
 func (h *ProjectHandler) GetProjectDetail(ctx *gin.Context) {
