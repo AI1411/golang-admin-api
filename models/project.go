@@ -12,6 +12,8 @@ type Project struct {
 	ProjectDescription string    `json:"project_description" binding:"omitempty,max=255"`
 	CreatedAt          time.Time `json:"created_at"`
 	UpdatedAt          time.Time `json:"updated_at"`
+
+	Epics EpicList `json:"epics" binding:"omitempty,dive"`
 }
 
 func (p *Project) CreateUUID() {

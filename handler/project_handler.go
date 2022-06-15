@@ -33,7 +33,7 @@ func (h *ProjectHandler) GetProjects(ctx *gin.Context) {
 func (h *ProjectHandler) GetProjectDetail(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var project models.Project
-	if err := h.Db.Where("id = ?", id).First(&project).Error; err != nil {
+	if err := h.Db.Where("id = ?", id).Preload("Epics").First(&project).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("project not found"))

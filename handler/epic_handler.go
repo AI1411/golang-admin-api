@@ -40,7 +40,10 @@ func (h *EpicHandler) GetEpics(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to get epics", err))
 		return
 	}
-	ctx.JSON(http.StatusOK, epics)
+	ctx.JSON(http.StatusOK, gin.H{
+		"total": len(epics),
+		"epics": epics,
+	})
 }
 
 func (h *EpicHandler) GetEpicDetail(ctx *gin.Context) {
