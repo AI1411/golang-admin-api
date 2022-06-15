@@ -71,7 +71,10 @@ func Router() *gin.Engine {
 	}
 	coupons := r.Group("/coupons")
 	{
+		coupons.GET("/", couponHandler.GetAllCoupon)
+		coupons.GET("/:id", couponHandler.GetCouponDetail)
 		coupons.POST("", couponHandler.CreateCoupon)
+		coupons.PUT("/:id", couponHandler.UpdateCoupon)
 		coupons.POST("/:coupon_id/users/:user_id", couponHandler.AcquireCoupon)
 	}
 	userGroups := r.Group("/userGroups")
