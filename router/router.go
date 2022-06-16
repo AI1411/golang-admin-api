@@ -94,6 +94,7 @@ func Router() *gin.Engine {
 		epics.GET("/:id", epicHandler.GetEpicDetail)
 		epics.POST("", epicHandler.CreateEpic)
 		epics.PUT("/:id", epicHandler.UpdateEpic)
+		epics.DELETE("/:id", epicHandler.DeleteEpic)
 	}
 	projects := r.Group("/projects")
 	{

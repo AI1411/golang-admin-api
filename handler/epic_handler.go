@@ -101,6 +101,27 @@ func (h *EpicHandler) UpdateEpic(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, epic)
 }
 
+func (h *EpicHandler) DeleteEpic(ctx *gin.Context) {
+	var epic models.Epic
+	id := ctx.Param("id")
+	if err := h.Db.Where("id = ?", id).First(&epic).Error; err != nil {
+		switch err {
+		case gorm.ErrRecordNotFound:
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("epic not found"))
+		case gorm.ErrInvalidSQL:
+			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
+		}
+		return
+	}
+
+	if err := h.Db.Delete(&epic).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to delete epic", err))
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
+}
+
 func createEpicQueryBuilder(params searchEpicParams, h *EpicHandler) *gorm.DB {
 	var products []models.Product
 	query := h.Db.Find(&products)
