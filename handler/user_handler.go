@@ -19,13 +19,34 @@ type UserHandler struct {
 	Db *gorm.DB
 }
 
+type searchUserParams struct {
+	FirstName string `form:"first_name" binding:"omitempty,max=64"`
+	LastName  string `form:"last_name" binding:"omitempty,max=64"`
+	Age       string `form:"age" binding:"omitempty,numeric"`
+	Email     string `form:"email" binding:"omitempty,max=64"`
+	Offset    string `form:"offset,default=0" binding:"omitempty,numeric"`
+	Limit     string `form:"limit,default=10" binding:"omitempty,numeric"`
+}
+
 func NewUserHandler(db *gorm.DB) *UserHandler {
 	return &UserHandler{Db: db}
 }
 
 func (h *UserHandler) GetAllUser(ctx *gin.Context) {
+	var params searchUserParams
+	if err := ctx.ShouldBindQuery(&params); err != nil {
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
+		return
+	}
+
 	var users []models.User
-	h.Db.Preload("Todos").Find(&users)
+	query := createUserQueryBuilder(params, h)
+	if err := query.Preload("Todos").Find(&users).Error; err != nil {
+		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to get users", err))
+		return
+	}
+	log.Printf("param %+v", params)
 	ctx.JSON(http.StatusOK, gin.H{
 		"total": len(users),
 		"users": users,
@@ -142,4 +163,23 @@ func (h *UserHandler) CreateFile(filepath string) error {
 		}
 	}
 	return nil
+}
+
+func createUserQueryBuilder(params searchUserParams, h *UserHandler) *gorm.DB {
+	var users []models.User
+	query := h.Db.Find(&users)
+
+	if params.FirstName != "" {
+		query = query.Where("first_name LIKE ?", "%"+params.FirstName+"%")
+	}
+	if params.LastName != "" {
+		query = query.Where("last_name LIKE ?", "%"+params.LastName+"%")
+	}
+	if params.Age != "" {
+		query = query.Where("age = ?", params.Age)
+	}
+	if params.Email != "" {
+		query = query.Where("email = ?", params.Email)
+	}
+	return query
 }
