@@ -42,7 +42,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:22+09:00",
 					"updated_at": "2022-06-20T22:14:22+09:00",
-					"users": []
+					"todos": []
 				},
 				{
 					"id": "5c3325c1-d539-42d6-b405-2af2f6b99ed9",
@@ -53,7 +53,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:23+09:00",
 					"updated_at": "2022-06-20T22:14:23+09:00",
-					"users": []
+					"todos": []
 				}
 			]
 		}`,
@@ -132,7 +132,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:22+09:00",
 					"updated_at": "2022-06-20T22:14:22+09:00",
-					"users": []
+					"todos": []
 				}
 			]
 		}`,
@@ -156,7 +156,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:22+09:00",
 					"updated_at": "2022-06-20T22:14:22+09:00",
-					"users": []
+					"todos": []
 				}
 			]
 		}`,
@@ -180,7 +180,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:22+09:00",
 					"updated_at": "2022-06-20T22:14:22+09:00",
-					"users": []
+					"todos": []
 				}
 			]
 		}`,
@@ -204,7 +204,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:22+09:00",
 					"updated_at": "2022-06-20T22:14:22+09:00",
-					"users": []
+					"todos": []
 				}
 			]
 		}`,
@@ -228,7 +228,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:23+09:00",
 					"updated_at": "2022-06-20T22:14:23+09:00",
-					"users": []
+					"todos": []
 				}
 			]
 		}`,
@@ -252,7 +252,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:22+09:00",
 					"updated_at": "2022-06-20T22:14:22+09:00",
-					"users": []
+					"todos": []
 				}
 			]
 		}`,
@@ -309,7 +309,7 @@ var getUserDetailTestCases = []struct {
 			"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 			"created_at": "2022-06-20T22:14:22+09:00",
 			"updated_at": "2022-06-20T22:14:22+09:00",
-			"users": []
+			"todos": []
 		}`,
 	},
 	{

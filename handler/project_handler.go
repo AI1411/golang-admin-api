@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -18,9 +19,22 @@ func NewProjectHandler(db *gorm.DB) *ProjectHandler {
 	return &ProjectHandler{Db: db}
 }
 
+type searchProjectParams struct {
+	ProjectTitle string `form:"project_title" binding:"max=64"`
+	Offset       string `form:"offset,default=0" binding:"omitempty,numeric"`
+	Limit        string `form:"limit,default=10" binding:"omitempty,numeric"`
+}
+
 func (h *ProjectHandler) GetProjects(ctx *gin.Context) {
+	var params searchProjectParams
+	if err := ctx.ShouldBindQuery(&params); err != nil {
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
+		return
+	}
 	var projects []models.Project
-	if err := h.Db.Find(&projects).Error; err != nil {
+	query := createProjectQueryBuilder(params, h)
+	if err := query.Find(&projects).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to get epics", err))
 		return
 	}
@@ -100,4 +114,20 @@ func (h *ProjectHandler) DeleteProject(ctx *gin.Context) {
 	}
 	h.Db.Delete(&project)
 	ctx.Status(http.StatusNoContent)
+}
+
+func createProjectQueryBuilder(param searchProjectParams, h *ProjectHandler) *gorm.DB {
+	var projects []models.Project
+	query := h.Db.Find(&projects)
+	log.Printf("p=%+v", param)
+	if param.ProjectTitle != "" {
+		query = query.Where("project_title LIKE ?", "%"+param.ProjectTitle+"%")
+	}
+	if param.Offset != "" {
+		query = query.Offset(param.Offset)
+	}
+	if param.Limit != "" {
+		query = query.Limit(param.Limit)
+	}
+	return query
 }

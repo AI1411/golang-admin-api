@@ -11,6 +11,6 @@ func Init() *gorm.DB {
 	if err != nil {
 		panic("failed to connect db")
 	}
-	db.LogMode(true)
+	db.LogMode(false)
 	return db
 }

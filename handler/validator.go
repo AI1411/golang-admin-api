@@ -77,6 +77,8 @@ func getAttribute(attribute string) string {
 		return "タイトル"
 	case "ProjectID":
 		return "プロジェクトID"
+	case "ProjectTitle":
+		return "プロジェクト名"
 	case "CreatedAt":
 		return "作成日時"
 	case "UpdatedAt":
