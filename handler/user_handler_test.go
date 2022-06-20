@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -13,6 +15,8 @@ import (
 
 	"github.com/AI1411/golang-admin-api/db"
 )
+
+const userIDForTest = "090e142d-baa3-4039-9d21-cf5a1af39094"
 
 var getUsersTestCases = []struct {
 	tid        int
@@ -38,7 +42,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:22+09:00",
 					"updated_at": "2022-06-20T22:14:22+09:00",
-					"todos": []
+					"users": []
 				},
 				{
 					"id": "5c3325c1-d539-42d6-b405-2af2f6b99ed9",
@@ -49,7 +53,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:23+09:00",
 					"updated_at": "2022-06-20T22:14:23+09:00",
-					"todos": []
+					"users": []
 				}
 			]
 		}`,
@@ -128,7 +132,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:22+09:00",
 					"updated_at": "2022-06-20T22:14:22+09:00",
-					"todos": []
+					"users": []
 				}
 			]
 		}`,
@@ -152,7 +156,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:22+09:00",
 					"updated_at": "2022-06-20T22:14:22+09:00",
-					"todos": []
+					"users": []
 				}
 			]
 		}`,
@@ -176,7 +180,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:22+09:00",
 					"updated_at": "2022-06-20T22:14:22+09:00",
-					"todos": []
+					"users": []
 				}
 			]
 		}`,
@@ -200,7 +204,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:22+09:00",
 					"updated_at": "2022-06-20T22:14:22+09:00",
-					"todos": []
+					"users": []
 				}
 			]
 		}`,
@@ -224,7 +228,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:23+09:00",
 					"updated_at": "2022-06-20T22:14:23+09:00",
-					"todos": []
+					"users": []
 				}
 			]
 		}`,
@@ -248,7 +252,7 @@ var getUsersTestCases = []struct {
 					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
 					"created_at": "2022-06-20T22:14:22+09:00",
 					"updated_at": "2022-06-20T22:14:22+09:00",
-					"todos": []
+					"users": []
 				}
 			]
 		}`,
@@ -280,6 +284,108 @@ func TestGetUsers(t *testing.T) {
 			r.ServeHTTP(rec, req)
 			assert.Equal(t, tt.wantStatus, rec.Code)
 			assert.JSONEq(t, tt.wantBody, rec.Body.String())
+		})
+	}
+}
+
+var getUserDetailTestCases = []struct {
+	tid        int
+	name       string
+	userID     string
+	wantStatus int
+	wantBody   string
+}{
+	{
+		tid:        1,
+		name:       "ユーザ詳細が正常に取得できること",
+		userID:     userIDForTest,
+		wantStatus: http.StatusOK,
+		wantBody: `{
+			"id": "090e142d-baa3-4039-9d21-cf5a1af39094",
+			"first_name": "1",
+			"last_name": "1",
+			"age": 22,
+			"email": "test@gmail.com",
+			"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
+			"created_at": "2022-06-20T22:14:22+09:00",
+			"updated_at": "2022-06-20T22:14:22+09:00",
+			"users": []
+		}`,
+	},
+	{
+		tid:        2,
+		name:       "存在しないIDを指定した場合404エラーになること",
+		userID:     "invalid_user",
+		wantStatus: http.StatusNotFound,
+		wantBody:   `{"message": "user not found","status": 404,"error": "not_found","causes": null}`,
+	},
+}
+
+func TestUserDetail(t *testing.T) {
+	dbConn := db.Init()
+	dbConn.Exec("TRUNCATE TABLE users")
+	dbConn.Exec("insert into users (id, first_name, last_name, age, email, password, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1','1',22,'test@gmail.com','$2a$14$RCDw54cGcHMwW2HbYtVb8uteFuwNcINqjPCbaG3xL5K34hknc3ta6','2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2','2',37,'ishii@gmail.com','$2a$14$RCDw54cGcHMwW2HbYtVb8uteFuwNcINqjPCbaG3xL5K34hknc3ta6', '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
+	r := gin.New()
+	userHandler := NewUserHandler(dbConn)
+	r.GET("/users/:id", userHandler.GetUserDetail)
+
+	for _, tt := range getUserDetailTestCases {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			var req *http.Request
+			rec := httptest.NewRecorder()
+			req = httptest.NewRequest(http.MethodGet, "/users/"+tt.userID, nil)
+			r.ServeHTTP(rec, req)
+			assert.Equal(t, tt.wantStatus, rec.Code)
+			assert.JSONEq(t, tt.wantBody, rec.Body.String())
+		})
+	}
+}
+
+var deleteUserTestCases = []struct {
+	tid        int
+	name       string
+	userID     string
+	request    map[string]interface{}
+	wantStatus int
+	wantBody   string
+}{
+	{
+		tid:        1,
+		name:       "ユーザが正常に削除できること",
+		userID:     userIDForTest,
+		wantStatus: http.StatusNoContent,
+	},
+	{
+		tid:        2,
+		name:       "削除できるユーザがない場合は404エラー",
+		userID:     "10",
+		wantStatus: http.StatusNotFound,
+	},
+}
+
+func TestDeleteUser(t *testing.T) {
+	dbConn := db.Init()
+	dbConn.Exec("TRUNCATE TABLE users")
+	dbConn.Exec("insert into users (id, first_name, last_name, age, email, password, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1','1',22,'test@gmail.com','$2a$14$RCDw54cGcHMwW2HbYtVb8uteFuwNcINqjPCbaG3xL5K34hknc3ta6','2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2','2',37,'ishii@gmail.com','$2a$14$RCDw54cGcHMwW2HbYtVb8uteFuwNcINqjPCbaG3xL5K34hknc3ta6', '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
+	r := gin.New()
+	userHandler := NewUserHandler(dbConn)
+	r.DELETE("/users/:id", userHandler.DeleteUser)
+
+	for _, tt := range deleteUserTestCases {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			var req *http.Request
+			rec := httptest.NewRecorder()
+			jsonStr, _ := json.Marshal(tt.request)
+			req = httptest.NewRequest(http.MethodDelete, "/users/"+tt.userID, bytes.NewBuffer(jsonStr))
+			r.ServeHTTP(rec, req)
+			assert.Equal(t, tt.wantStatus, rec.Code)
+			if tt.wantBody != "" {
+				assert.JSONEq(t, tt.wantBody, rec.Body.String())
+			}
 		})
 	}
 }
