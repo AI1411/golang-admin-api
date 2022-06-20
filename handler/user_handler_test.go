@@ -181,6 +181,78 @@ var getUsersTestCases = []struct {
 			]
 		}`,
 	},
+	{
+		tid:  7,
+		name: "emailで検索",
+		request: map[string]interface{}{
+			"email": "test@gmail.com",
+		},
+		wantStatus: http.StatusOK,
+		wantBody: `{
+			"total": 1,
+			"users": [
+				{
+					"id": "090e142d-baa3-4039-9d21-cf5a1af39094",
+					"first_name": "1",
+					"last_name": "1",
+					"age": 22,
+					"email": "test@gmail.com",
+					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
+					"created_at": "2022-06-20T22:14:22+09:00",
+					"updated_at": "2022-06-20T22:14:22+09:00",
+					"todos": []
+				}
+			]
+		}`,
+	},
+	{
+		tid:  8,
+		name: "offset指定で検索",
+		request: map[string]interface{}{
+			"offset": 1,
+		},
+		wantStatus: http.StatusOK,
+		wantBody: `{
+			"total": 1,
+			"users": [
+				{
+					"id": "5c3325c1-d539-42d6-b405-2af2f6b99ed9",
+					"first_name": "2",
+					"last_name": "2",
+					"age": 37,
+					"email": "ishii@gmail.com",
+					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
+					"created_at": "2022-06-20T22:14:23+09:00",
+					"updated_at": "2022-06-20T22:14:23+09:00",
+					"todos": []
+				}
+			]
+		}`,
+	},
+	{
+		tid:  9,
+		name: "limit指定で検索",
+		request: map[string]interface{}{
+			"limit": 1,
+		},
+		wantStatus: http.StatusOK,
+		wantBody: `{
+			"total": 1,
+			"users": [
+				{
+					"id": "090e142d-baa3-4039-9d21-cf5a1af39094",
+					"first_name": "1",
+					"last_name": "1",
+					"age": 22,
+					"email": "test@gmail.com",
+					"password": "JDJhJDE0JFJDRHc1NGNHY0hNd1cySGJZdFZiOHV0ZUZ1d05jSU5xalBDYmFHM3hMNUszNGhrbmMzdGE2",
+					"created_at": "2022-06-20T22:14:22+09:00",
+					"updated_at": "2022-06-20T22:14:22+09:00",
+					"todos": []
+				}
+			]
+		}`,
+	},
 }
 
 func TestGetUsers(t *testing.T) {

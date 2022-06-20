@@ -181,5 +181,11 @@ func createUserQueryBuilder(params searchUserParams, h *UserHandler) *gorm.DB {
 	if params.Email != "" {
 		query = query.Where("email = ?", params.Email)
 	}
+	if params.Offset != "" {
+		query = query.Offset(params.Offset)
+	}
+	if params.Limit != "" {
+		query = query.Limit(params.Limit)
+	}
 	return query
 }
