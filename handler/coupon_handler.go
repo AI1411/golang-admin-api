@@ -19,24 +19,22 @@ func NewCouponHandler(db *gorm.DB) *CouponHandler {
 }
 
 type searchCouponParams struct {
-	ID                string `json:"id"`
-	Title             string `json:"title"`
-	Remarks           string `json:"remarks"`
-	DiscountAmount    string `json:"discountAmount"`
-	DiscountRate      string `json:"discountRate"`
-	MaxDiscountAmount string `json:"maxDiscountAmount"`
-	UseStartAtFrom    string `json:"useStartAtFrom"`
-	UseStartAtTo      string `json:"useStartAtTo"`
-	UseEndAtFrom      string `json:"useEndAtFrom"`
-	UseEndAtTo        string `json:"useEndAtTo"`
-	PublicStartAtFrom string `json:"publicStartAtFrom"`
-	PublicStartAtTo   string `json:"publicStartAtTo"`
-	PublicEndAtFrom   string `json:"publicEndAtFrom"`
-	PublicEndAtTo     string `json:"publicEndAtTo"`
-	IsPublic          string `json:"isPublic"`
-	IsPremium         string `json:"isPremium"`
-	Offset            string `json:"offset"`
-	Limit             string `json:"limit"`
+	Title             string `form:"title" binding:"omitempty,max=64"`
+	DiscountAmount    string `form:"discount_amount" binding:"omitempty,numeric"`
+	DiscountRate      string `form:"discount_rate" binding:"omitempty,numeric"`
+	MaxDiscountAmount string `form:"max_discount_amount" binding:"omitempty,numeric"`
+	UseStartAtFrom    string `form:"use_start_at_from" binding:"omitempty,datetime"`
+	UseStartAtTo      string `form:"use_start_at_to" binding:"omitempty,datetime"`
+	UseEndAtFrom      string `form:"use_end_at_from" binding:"omitempty,datetime"`
+	UseEndAtTo        string `form:"use_end_at_to" binding:"omitempty,datetime"`
+	PublicStartAtFrom string `form:"public_start_at_from" binding:"omitempty,datetime"`
+	PublicStartAtTo   string `form:"public_start_at_to" binding:"omitempty,datetime"`
+	PublicEndAtFrom   string `form:"public_end_at_from" binding:"omitempty,datetime"`
+	PublicEndAtTo     string `form:"public_end_at_to" binding:"omitempty,datetime"`
+	IsPublic          string `form:"is_public" binding:"omitempty,boolean"`
+	IsPremium         string `form:"is_premium" binding:"omitempty,boolean"`
+	Offset            string `form:"offset,default=0" binding:"omitempty,numeric"`
+	Limit             string `form:"limit,default=10" binding:"omitempty,numeric"`
 }
 
 func (h *CouponHandler) GetAllCoupon(ctx *gin.Context) {
@@ -166,14 +164,8 @@ func createCouponQueryBuilder(params searchCouponParams, h *CouponHandler) *gorm
 	var coupons []models.Coupon
 	query := h.Db.Find(&coupons)
 
-	if params.ID != "" {
-		query = query.Where("id = ?", params.ID)
-	}
 	if params.Title != "" {
 		query = query.Where("title LIKE ?", "%"+params.Title+"%")
-	}
-	if params.Remarks != "" {
-		query = query.Where("title LIKE ?", "%"+params.Remarks+"%")
 	}
 	if params.DiscountAmount != "" {
 		query = query.Where("discount_amount = ?", params.DiscountAmount)
@@ -185,28 +177,28 @@ func createCouponQueryBuilder(params searchCouponParams, h *CouponHandler) *gorm
 		query = query.Where("max_discount_amount = ?", params.MaxDiscountAmount)
 	}
 	if params.UseStartAtFrom != "" {
-		query = query.Where("quantity > ?", params.UseStartAtFrom)
+		query = query.Where("use_start_at > ?", params.UseStartAtFrom)
 	}
 	if params.UseStartAtTo != "" {
-		query = query.Where("quantity < ?", params.UseStartAtTo)
+		query = query.Where("use_start_at < ?", params.UseStartAtTo)
 	}
 	if params.UseEndAtFrom != "" {
-		query = query.Where("quantity > ?", params.UseEndAtFrom)
+		query = query.Where("use_end_at > ?", params.UseEndAtFrom)
 	}
 	if params.UseEndAtTo != "" {
-		query = query.Where("quantity < ?", params.UseEndAtTo)
+		query = query.Where("use_end_at < ?", params.UseEndAtTo)
 	}
 	if params.PublicStartAtFrom != "" {
-		query = query.Where("quantity > ?", params.PublicStartAtFrom)
+		query = query.Where("public_start_at > ?", params.PublicStartAtFrom)
 	}
 	if params.PublicStartAtTo != "" {
-		query = query.Where("quantity < ?", params.PublicStartAtTo)
+		query = query.Where("public_start_at < ?", params.PublicStartAtTo)
 	}
 	if params.PublicEndAtFrom != "" {
-		query = query.Where("quantity > ?", params.PublicEndAtFrom)
+		query = query.Where("public_end_at > ?", params.PublicEndAtFrom)
 	}
 	if params.PublicEndAtTo != "" {
-		query = query.Where("quantity < ?", params.PublicEndAtTo)
+		query = query.Where("public_end_at < ?", params.PublicEndAtTo)
 	}
 	if params.IsPublic != "" {
 		query = query.Where("is_public = ?", params.IsPublic)
