@@ -19,18 +19,17 @@ func NewOrderHandler(db *gorm.DB) *OrderHandler {
 	return &OrderHandler{Db: db}
 }
 
-type searchOrderPrams struct {
-	ID         *string `form:"id" binding:"omitempty"`
-	UserID     *string `form:"user_id" binding:"omitempty"`
-	Quantity   *string `form:"quantity" binding:"omitempty"`
-	TotalPrice *string `form:"total_price" binding:"omitempty,numeric"`
-	CreatedAt  *string `form:"created_at" binding:"omitempty,datetime"`
-	Offset     string  `form:"offset" binding:"omitempty,numeric"`
-	Limit      string  `form:"limit" binding:"omitempty,numeric"`
+type searchOrderParams struct {
+	UserID      string `form:"user_id" binding:"omitempty,uuid4"`
+	Quantity    string `form:"quantity" binding:"omitempty,numeric"`
+	TotalPrice  string `form:"total_price" binding:"omitempty,numeric"`
+	OrderStatus string `form:"order_status" binding:"omitempty,oneof=new paid canceled delivered refunded returned partially partially_paid"`
+	Offset      string `form:"offset,default=0" binding:"omitempty,numeric"`
+	Limit       string `form:"limit,default=10" binding:"omitempty,numeric"`
 }
 
 func (h *OrderHandler) GetOrders(ctx *gin.Context) {
-	var params searchOrderPrams
+	var params searchOrderParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		res := createValidateErrorResponse(err)
 		ctx.AbortWithStatusJSON(res.Code, res)
@@ -147,20 +146,20 @@ func (h *OrderHandler) DeleteOrder(ctx *gin.Context) {
 	ctx.JSON(http.StatusNoContent, nil)
 }
 
-func createOrderQueryBuilder(params searchOrderPrams, h *OrderHandler) *gorm.DB {
+func createOrderQueryBuilder(params searchOrderParams, h *OrderHandler) *gorm.DB {
 	var orders []models.Order
 	query := h.Db.Order("created_at desc").Find(&orders)
-	if params.ID != nil {
-		query = query.Where("id = ?", *params.ID)
+	if params.UserID != "" {
+		query = query.Where("user_id = ?", params.UserID)
 	}
-	if params.UserID != nil {
-		query = query.Where("user_id = ?", *params.UserID)
+	if params.Quantity != "" {
+		query = query.Where("quantity = ?", params.Quantity)
 	}
-	if params.Quantity != nil {
-		query = query.Where("quantity = ?", *params.Quantity)
+	if params.TotalPrice != "" {
+		query = query.Where("total_price = ?", params.TotalPrice)
 	}
-	if params.CreatedAt != nil {
-		query = query.Where("created_at = ?", *params.CreatedAt)
+	if params.OrderStatus != "" {
+		query = query.Where("order_status = ?", params.OrderStatus)
 	}
 	if params.Offset != "" {
 		query = query.Offset(params.Offset)
