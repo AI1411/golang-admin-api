@@ -19,13 +19,13 @@ func NewProductHandler(db *gorm.DB) *ProductHandler {
 }
 
 type searchProductParams struct {
-	ProductID   string `form:"product_id"`
-	ProductName string `form:"product_name"`
-	Price       string `form:"price"`
-	Remarks     string `form:"remarks"`
-	Quantity    string `form:"quantity"`
-	Offset      string `form:"offset"`
-	Limit       string `form:"limit"`
+	ProductName string `form:"product_name" binding:"max=64"`
+	PriceFrom   string `form:"price_from" binding:"omitempty,numeric"`
+	PriceTo     string `form:"price_to" binding:"omitempty,numeric"`
+	Remarks     string `form:"remarks" binding:"omitempty,max=255"`
+	Quantity    string `form:"quantity" binding:"omitempty,numeric,min=1"`
+	Offset      string `form:"offset,default=0" binding:"omitempty,numeric"`
+	Limit       string `form:"limit,default=10" binding:"omitempty,numeric"`
 }
 
 func (h *ProductHandler) GetAllProduct(ctx *gin.Context) {
@@ -123,15 +123,14 @@ func (h *ProductHandler) DeleteProduct(ctx *gin.Context) {
 func createProductQueryBuilder(params searchProductParams, h *ProductHandler) *gorm.DB {
 	var products []models.Product
 	query := h.Db.Find(&products)
-
-	if params.ProductID != "" {
-		query = query.Where("product_id = ?", params.ProductID)
-	}
 	if params.ProductName != "" {
 		query = query.Where("product_name LIKE ?", "%"+params.ProductName+"%")
 	}
-	if params.Price != "" {
-		query = query.Where("price = ?", params.Price)
+	if params.PriceFrom != "" {
+		query = query.Where("price > ?", params.PriceFrom)
+	}
+	if params.PriceTo != "" {
+		query = query.Where("price < ?", params.PriceTo)
 	}
 	if params.Remarks != "" {
 		query = query.Where("remarks LIKE ?", "%"+params.Remarks+"%")
