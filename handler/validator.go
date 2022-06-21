@@ -2,10 +2,95 @@ package handler
 
 import (
 	"errors"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
+	"reflect"
+	"strconv"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 )
+
+const (
+	validateTagForBoolean    = "boolean"
+	validateTagForTime       = "datetime"
+	validateTagForDateBefore = "before"
+	validateTagForDateAfter  = "after"
+)
+
+var validate *validator.Validate
+
+func init() {
+	// bindする際のバリデーションルールを登録
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		_ = v.RegisterValidation(validateTagForBoolean, isBoolean)
+		_ = v.RegisterValidation(validateTagForTime, isDateTimeString)
+		_ = v.RegisterValidation(validateTagForDateBefore, isBeforeDateField)
+		_ = v.RegisterValidation(validateTagForDateAfter, isAfterDateField)
+		validate = v
+	}
+}
+
+func isBoolean(fl validator.FieldLevel) bool {
+	field := fl.Field()
+	switch field.Kind() {
+	case reflect.Bool:
+		return true
+	default:
+		_, err := strconv.ParseBool(fl.Field().String())
+		return err == nil
+	}
+}
+
+// 日付時刻のバリデーション
+func isDateTimeString(fl validator.FieldLevel) bool {
+	_, err := time.Parse(time.RFC3339, fl.Field().String())
+	return err == nil
+}
+
+func isBeforeDateField(fl validator.FieldLevel) bool {
+	field := fl.Field()
+	kind := field.Kind()
+
+	currentField, currentKind, _, exist := fl.GetStructFieldOK2()
+	if !exist || currentKind != kind {
+		return false
+	}
+
+	fieldTime, err := time.Parse(time.RFC3339, field.String())
+	if err != nil {
+		return false
+	}
+
+	currentFieldTime, err := time.Parse(time.RFC3339, currentField.String())
+	if err != nil {
+		return false
+	}
+
+	return fieldTime.Before(currentFieldTime)
+}
+
+func isAfterDateField(fl validator.FieldLevel) bool {
+	field := fl.Field()
+	kind := field.Kind()
+
+	currentField, currentKind, _, exist := fl.GetStructFieldOK2()
+	if !exist || currentKind != kind {
+		return false
+	}
+
+	fieldTime, err := time.Parse(time.RFC3339, field.String())
+	if err != nil {
+		return false
+	}
+
+	currentFieldTime, err := time.Parse(time.RFC3339, currentField.String())
+	if err != nil {
+		return false
+	}
+
+	return fieldTime.After(currentFieldTime)
+}
 
 func createValidateErrorResponse(err error) *errorResponse {
 	if err == nil {
