@@ -17,14 +17,15 @@ func NewEpicHandler(db *gorm.DB) *EpicHandler {
 }
 
 type searchEpicParams struct {
-	IsOpen          string `binding:"omitempty,boolean" form:"is_open"`
-	AuthorID        string `binding:"omitempty,len=36" form:"author_id"`
-	EpicTitle       string `binding:"omitempty,max=64" form:"epic_title"`
-	EpicDescription string `binding:"omitempty,max=255" form:"epic_description"`
-	Label           string `binding:"omitempty,max=64" form:"label"`
-	MilestoneID     string `binding:"omitempty,len=36" form:"milestone_id"`
-	AssigneeID      string `binding:"omitempty,len=36" form:"assignee_id"`
-	ProjectID       string `binding:"omitempty,len=36" form:"project_id"`
+	IsOpen      string `binding:"omitempty,boolean" form:"is_open"`
+	AuthorID    string `binding:"omitempty,len=36" form:"author_id"`
+	EpicTitle   string `binding:"omitempty,max=64" form:"epic_title"`
+	Label       string `binding:"omitempty,max=64" form:"label"`
+	MilestoneID string `binding:"omitempty,len=36" form:"milestone_id"`
+	AssigneeID  string `binding:"omitempty,len=36" form:"assignee_id"`
+	ProjectID   string `binding:"omitempty,len=36" form:"project_id"`
+	Offset      string `form:"offset,default=0" binding:"omitempty,numeric"`
+	Limit       string `form:"limit,default=10" binding:"omitempty,numeric"`
 }
 
 func (h *EpicHandler) GetEpics(ctx *gin.Context) {
@@ -135,9 +136,6 @@ func createEpicQueryBuilder(params searchEpicParams, h *EpicHandler) *gorm.DB {
 	if params.EpicTitle != "" {
 		query = query.Where("epic_title LIKE ?", "%"+params.EpicTitle+"%")
 	}
-	if params.EpicDescription != "" {
-		query = query.Where("epic_description LIKE ?", "%"+params.EpicDescription+"%")
-	}
 	if params.Label != "" {
 		query = query.Where("label LIKE ?", "%"+params.Label+"%")
 	}
@@ -149,6 +147,12 @@ func createEpicQueryBuilder(params searchEpicParams, h *EpicHandler) *gorm.DB {
 	}
 	if params.ProjectID != "" {
 		query = query.Where("project_id = ?", params.ProjectID)
+	}
+	if params.Offset != "" {
+		query = query.Offset(params.Offset)
+	}
+	if params.Limit != "" {
+		query = query.Limit(params.Limit)
 	}
 	return query
 }
