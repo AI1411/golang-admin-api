@@ -85,6 +85,8 @@ func Router() *gin.Engine {
 	}
 	milestones := r.Group("/milestones")
 	{
+		milestones.GET("", milestoneHandler.GetMilestones)
+		milestones.GET("/:id", milestoneHandler.GetMilestoneDetail)
 		milestones.POST("", milestoneHandler.CreateMilestone)
 		milestones.PUT("/:id", milestoneHandler.UpdateMileStone)
 	}
