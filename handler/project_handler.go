@@ -12,11 +12,15 @@ import (
 )
 
 type ProjectHandler struct {
-	Db *gorm.DB
+	Db            *gorm.DB
+	uuidGenerator models.UUIDGenerator
 }
 
-func NewProjectHandler(db *gorm.DB) *ProjectHandler {
-	return &ProjectHandler{Db: db}
+func NewProjectHandler(db *gorm.DB, uuidGenerator models.UUIDGenerator) *ProjectHandler {
+	return &ProjectHandler{
+		Db:            db,
+		uuidGenerator: uuidGenerator,
+	}
 }
 
 type searchProjectParams struct {
@@ -66,7 +70,7 @@ func (h *ProjectHandler) CreateProject(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
-	project.CreateUUID()
+	project.ID = h.uuidGenerator.GenerateUUID()
 	if err := h.Db.Create(&project).Error; err != nil {
 		ctx.JSON(500, gin.H{"error": err.Error()})
 		return

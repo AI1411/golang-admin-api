@@ -3,12 +3,14 @@ package router
 import (
 	"github.com/AI1411/golang-admin-api/db"
 	"github.com/AI1411/golang-admin-api/handler"
+	"github.com/AI1411/golang-admin-api/models"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func Router() *gin.Engine {
 	dbConn := db.Init()
+	uuidGen := &models.RandomUUIDGenerator{}
 	todoHandler := handler.NewTodoHandler(dbConn)
 	userHandler := handler.NewUserHandler(dbConn)
 	authHandler := handler.NewAuthHandler(dbConn)
@@ -20,7 +22,7 @@ func Router() *gin.Engine {
 	userGroupHandler := handler.NewUserGroupHandler(dbConn)
 	milestoneHandler := handler.NewMilestoneHandler(dbConn)
 	epicHandler := handler.NewEpicHandler(dbConn)
-	projectHandler := handler.NewProjectHandler(dbConn)
+	projectHandler := handler.NewProjectHandler(dbConn, uuidGen)
 
 	r := gin.Default()
 	r.Use(cors.Default())

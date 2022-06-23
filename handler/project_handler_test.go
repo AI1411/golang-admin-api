@@ -11,9 +11,11 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/AI1411/golang-admin-api/db"
+	"github.com/AI1411/golang-admin-api/models/mock_model"
 )
 
 const projectIDForTest = "090e142d-baa3-4039-9d21-cf5a1af39094"
@@ -36,16 +38,12 @@ var getProjectsTestCases = []struct {
 					"id": "090e142d-baa3-4039-9d21-cf5a1af39094",
 					"project_title": "1",
 					"project_description": "1",
-					"created_at": "2022-06-20T22:14:22+09:00",
-					"updated_at": "2022-06-20T22:14:22+09:00",
 					"epics": null
 				},
 				{
 					"id": "5c3325c1-d539-42d6-b405-2af2f6b99ed9",
 					"project_title": "2",
 					"project_description": "2",
-					"created_at": "2022-06-20T22:14:23+09:00",
-					"updated_at": "2022-06-20T22:14:23+09:00",
 					"epics": null
 				}
 			],
@@ -105,8 +103,6 @@ var getProjectsTestCases = []struct {
 					"id": "090e142d-baa3-4039-9d21-cf5a1af39094",
 					"project_title": "1",
 					"project_description": "1",
-					"created_at": "2022-06-20T22:14:22+09:00",
-					"updated_at": "2022-06-20T22:14:22+09:00",
 					"epics": null
 				}
 			],
@@ -126,8 +122,6 @@ var getProjectsTestCases = []struct {
 					"id": "5c3325c1-d539-42d6-b405-2af2f6b99ed9",
 					"project_title": "2",
 					"project_description": "2",
-					"created_at": "2022-06-20T22:14:23+09:00",
-					"updated_at": "2022-06-20T22:14:23+09:00",
 					"epics": null
 				}
 			],
@@ -147,8 +141,6 @@ var getProjectsTestCases = []struct {
 					"id": "090e142d-baa3-4039-9d21-cf5a1af39094",
 					"project_title": "1",
 					"project_description": "1",
-					"created_at": "2022-06-20T22:14:22+09:00",
-					"updated_at": "2022-06-20T22:14:22+09:00",
 					"epics": null
 				}
 			],
@@ -162,7 +154,7 @@ func TestGetProjects(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE projects")
 	dbConn.Exec("insert into projects (id, project_title, project_description, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1','1','2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2','2', '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	projectHandler := NewProjectHandler(dbConn)
+	projectHandler := NewProjectHandler(dbConn, nil)
 	r.GET("/projects", projectHandler.GetProjects)
 
 	for _, tt := range getProjectsTestCases {
@@ -202,8 +194,6 @@ var getProjectDetailTestCases = []struct {
 			"id": "090e142d-baa3-4039-9d21-cf5a1af39094",
 			"project_title": "1",
 			"project_description": "1",
-			"created_at": "2022-06-20T22:14:22+09:00",
-			"updated_at": "2022-06-20T22:14:22+09:00",
 			"epics": []
 		}`,
 	},
@@ -221,7 +211,7 @@ func TestProjectDetail(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE projects")
 	dbConn.Exec("insert into projects (id, project_title, project_description, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1','1','2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2','2', '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	projectHandler := NewProjectHandler(dbConn)
+	projectHandler := NewProjectHandler(dbConn, nil)
 	r.GET("/projects/:id", projectHandler.GetProjectDetail)
 
 	for _, tt := range getProjectDetailTestCases {
@@ -260,12 +250,85 @@ var deleteProjectTestCases = []struct {
 	},
 }
 
+var createProjectTestCases = []struct {
+	tid        int
+	name       string
+	request    map[string]interface{}
+	wantStatus int
+	wantBody   string
+}{
+	{
+		tid:  1,
+		name: "プロジェクトが正常に作成できること",
+		request: map[string]interface{}{
+			"project_title":       "project title",
+			"project_description": "test",
+		},
+		wantStatus: http.StatusCreated,
+		wantBody: `{
+			"id": "090e142d-baa3-4039-9d21-cf5a1af39094",
+			"project_title": "project title",
+			"project_description": "test",
+			"epics": null
+		}`,
+	},
+	{
+		tid:  2,
+		name: "バリデーションエラー",
+		request: map[string]interface{}{
+			"project_title":       strings.Repeat("a", 65),
+			"project_description": strings.Repeat("a", 256),
+		},
+		wantStatus: http.StatusBadRequest,
+		wantBody: `{
+			"code": 400,
+			"message": "パラメータが不正です",
+			"details": [
+				{
+					"attribute": "ProjectTitle",
+					"message": "プロジェクト名は不正です"
+				},
+				{
+					"attribute": "ProjectDescription",
+					"message": "ProjectDescriptionは不正です"
+				}
+			]
+		}`,
+	},
+}
+
+func TestCreateProject(t *testing.T) {
+	dbConn := db.Init()
+	dbConn.Exec("TRUNCATE TABLE projects")
+	r := gin.New()
+	mockCtrl := gomock.NewController(t)
+	uuidGen := mock_models.NewMockUUIDGenerator(mockCtrl)
+	uuidGen.EXPECT().GenerateUUID().Return(projectIDForTest)
+
+	projectHandler := NewProjectHandler(dbConn, uuidGen)
+	r.POST("/projects", projectHandler.CreateProject)
+
+	for _, tt := range createProjectTestCases {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			var req *http.Request
+			rec := httptest.NewRecorder()
+			jsonStr, _ := json.Marshal(tt.request)
+			req = httptest.NewRequest(http.MethodPost, "/projects", bytes.NewBuffer(jsonStr))
+			r.ServeHTTP(rec, req)
+			assert.Equal(t, tt.wantStatus, rec.Code)
+			assert.JSONEq(t, tt.wantBody, rec.Body.String())
+		})
+	}
+}
+
 func TestDeleteProject(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE projects")
 	dbConn.Exec("insert into projects (id, project_title, project_description, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1','1','2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2','2', '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	projectHandler := NewProjectHandler(dbConn)
+	projectHandler := NewProjectHandler(dbConn, nil)
 	r.DELETE("/projects/:id", projectHandler.DeleteProject)
 
 	for _, tt := range deleteProjectTestCases {
