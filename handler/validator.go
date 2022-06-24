@@ -2,10 +2,13 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"reflect"
 	"strconv"
 	"time"
+
+	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin/binding"
 
@@ -116,6 +119,11 @@ func createValidateErrorResponse(err error) *errorResponse {
 		Message: "パラメータが不正です",
 		Details: details,
 	}
+}
+
+func (er *errorResponse) outputErrorLog(logger *zap.Logger, message, traceID string, err error) {
+	msg := fmt.Sprintf("%s: %s", message, err.Error())
+	logger.Error(msg, zap.String("trace_id", traceID))
 }
 
 func createValidationMessage(field string, tag string) string {

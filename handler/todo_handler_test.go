@@ -10,6 +10,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/AI1411/golang-admin-api/middleware"
+	logger "github.com/AI1411/golang-admin-api/server"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/stretchr/testify/require"
+
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 
@@ -212,8 +217,15 @@ func TestGetTodos(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE todos")
 	dbConn.Exec("insert into todos values (1, 'test1', 'body1', 'success', 'e29aa01f-8df4-422e-8341-ec976be91f8d', '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 'e29aa01f-8df4-422e-8341-ec976be91f8c', '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
+
 	r := gin.New()
-	todoHandler := NewTodoHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+
+	todoHandler := NewTodoHandler(dbConn, zapLogger)
 	r.GET("/todos", todoHandler.GetAll)
 
 	for _, tt := range getTodosTestCases {
@@ -272,8 +284,15 @@ func TestTodoDetail(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE todos")
 	dbConn.Exec("insert into todos values (1, 'test1', 'body1', 'success', 'e29aa01f-8df4-422e-8341-ec976be91f8d', '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 2, '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
+
 	r := gin.New()
-	todoHandler := NewTodoHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+
+	todoHandler := NewTodoHandler(dbConn, zapLogger)
 	r.GET("/todos/:id", todoHandler.GetDetail)
 
 	for _, tt := range getTodoDetailTestCases {
@@ -356,8 +375,15 @@ var createTodoTestCases = []struct {
 func TestCreateTodo(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE todos")
+
 	r := gin.New()
-	todoHandler := NewTodoHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+
+	todoHandler := NewTodoHandler(dbConn, zapLogger)
 	r.POST("/todos", todoHandler.CreateTodo)
 
 	for _, tt := range createTodoTestCases {
@@ -437,8 +463,15 @@ func TestUpdateTodo(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE todos")
 	dbConn.Exec("insert into todos values ('e29aa01f-8df4-422e-8341-ec976be91f8q', 'test1', 'body1', 'success', 'e29aa01f-8df4-422e-8341-ec976be91f81', '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 'e29aa01f-8df4-422e-8341-ec976be91f82', '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
+
 	r := gin.New()
-	todoHandler := NewTodoHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+
+	todoHandler := NewTodoHandler(dbConn, zapLogger)
 	r.PUT("/todos/:id", todoHandler.UpdateTodo)
 
 	for _, tt := range updateTodoTestCases {
@@ -492,8 +525,15 @@ func TestDeleteTodo(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE todos")
 	dbConn.Exec("insert into todos values (1, 'test1', 'body1', 'success', 'e29aa01f-8df4-422e-8341-ec976be91f8d', '2022-03-26 21:34:52', '2022-03-26 21:34:52'),(2, 'test2', 'body2', 'waiting', 'e29aa01f-8df4-422e-8341-ec976be91f8c', '2022-03-26 21:34:52', '2022-03-26 21:34:52');")
+
 	r := gin.New()
-	todoHandler := NewTodoHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+
+	todoHandler := NewTodoHandler(dbConn, zapLogger)
 	r.DELETE("/todos/:id", todoHandler.DeleteTodo)
 
 	for _, tt := range deleteTodoTestCases {

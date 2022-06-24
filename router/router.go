@@ -1,17 +1,28 @@
 package router
 
 import (
+	"log"
+
 	"github.com/AI1411/golang-admin-api/db"
 	"github.com/AI1411/golang-admin-api/handler"
+	"github.com/AI1411/golang-admin-api/middleware"
 	"github.com/AI1411/golang-admin-api/models"
+	logger "github.com/AI1411/golang-admin-api/server"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 )
 
 func Router() *gin.Engine {
+	zapLogger, err := logger.NewLogger(false)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() { _ = zapLogger.Sync() }()
+
 	dbConn := db.Init()
 	uuidGen := &models.RandomUUIDGenerator{}
-	todoHandler := handler.NewTodoHandler(dbConn)
+	todoHandler := handler.NewTodoHandler(dbConn, zapLogger)
 	userHandler := handler.NewUserHandler(dbConn)
 	authHandler := handler.NewAuthHandler(dbConn)
 	productHandler := handler.NewProductHandler(dbConn, uuidGen)
@@ -26,6 +37,9 @@ func Router() *gin.Engine {
 
 	r := gin.Default()
 	r.Use(cors.Default())
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
 	todos := r.Group("/todos")
 	{
 		todos.GET("", todoHandler.GetAll)

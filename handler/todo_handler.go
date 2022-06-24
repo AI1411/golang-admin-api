@@ -3,6 +3,8 @@ package handler
 import (
 	"net/http"
 
+	"go.uber.org/zap"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 
@@ -11,11 +13,15 @@ import (
 )
 
 type TodoHandler struct {
-	Db *gorm.DB
+	Db     *gorm.DB
+	logger *zap.Logger
 }
 
-func NewTodoHandler(db *gorm.DB) *TodoHandler {
-	return &TodoHandler{Db: db}
+func NewTodoHandler(db *gorm.DB, logger *zap.Logger) *TodoHandler {
+	return &TodoHandler{
+		Db:     db,
+		logger: logger,
+	}
 }
 
 type searchTodoPrams struct {
@@ -32,6 +38,7 @@ func (h *TodoHandler) GetAll(ctx *gin.Context) {
 	var params searchTodoPrams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind query params", "a", err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
