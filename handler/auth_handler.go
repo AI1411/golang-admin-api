@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/AI1411/golang-admin-api/util/appcontext"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 
@@ -18,11 +20,15 @@ type Claims struct {
 }
 
 type AuthHandler struct {
-	Db *gorm.DB
+	Db     *gorm.DB
+	logger *zap.Logger
 }
 
-func NewAuthHandler(db *gorm.DB) *AuthHandler {
-	return &AuthHandler{Db: db}
+func NewAuthHandler(db *gorm.DB, logger *zap.Logger) *AuthHandler {
+	return &AuthHandler{
+		Db:     db,
+		logger: logger,
+	}
 }
 
 type authRequest struct {
@@ -44,10 +50,12 @@ type meRequest struct {
 }
 
 func (h *AuthHandler) Register(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var req authRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
@@ -78,10 +86,14 @@ func (h *AuthHandler) Register(ctx *gin.Context) {
 }
 
 func (h *AuthHandler) Login(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var req loginRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		panic(err)
+		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
+		ctx.AbortWithStatusJSON(res.Code, res)
+		return
 	}
 
 	var user models.User

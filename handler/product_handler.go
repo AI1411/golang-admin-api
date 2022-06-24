@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/AI1411/golang-admin-api/util/appcontext"
+	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,12 +14,14 @@ import (
 
 type ProductHandler struct {
 	Db            *gorm.DB
+	logger        *zap.Logger
 	uuidGenerator models.UUIDGenerator
 }
 
-func NewProductHandler(db *gorm.DB, uuidGenerator models.UUIDGenerator) *ProductHandler {
+func NewProductHandler(db *gorm.DB, uuidGenerator models.UUIDGenerator, logger *zap.Logger) *ProductHandler {
 	return &ProductHandler{
 		Db:            db,
+		logger:        logger,
 		uuidGenerator: uuidGenerator,
 	}
 }
@@ -33,9 +37,11 @@ type searchProductParams struct {
 }
 
 func (h *ProductHandler) GetAllProduct(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var params searchProductParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
@@ -93,9 +99,11 @@ func (h *ProductHandler) UpdateProduct(ctx *gin.Context) {
 		}
 		return
 	}
+	traceID := appcontext.GetTraceID(ctx)
 	if err := ctx.ShouldBindJSON(&product); err != nil {
-		restErr := errors.NewBadRequestError("invalid request")
-		ctx.JSON(restErr.Status(), restErr)
+		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
+		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
 	if err := h.Db.Save(&product).Error; err != nil {

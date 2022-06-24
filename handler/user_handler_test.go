@@ -4,6 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/AI1411/golang-admin-api/middleware"
+	logger "github.com/AI1411/golang-admin-api/server"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -264,7 +268,12 @@ func TestGetUsers(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE users")
 	dbConn.Exec("insert into users (id, first_name, last_name, age, email, password, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1','1',22,'test@gmail.com','$2a$14$RCDw54cGcHMwW2HbYtVb8uteFuwNcINqjPCbaG3xL5K34hknc3ta6','2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2','2',37,'ishii@gmail.com','$2a$14$RCDw54cGcHMwW2HbYtVb8uteFuwNcINqjPCbaG3xL5K34hknc3ta6', '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	userHandler := NewUserHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	userHandler := NewUserHandler(dbConn, zapLogger)
 	r.GET("/users", userHandler.GetAllUser)
 
 	for _, tt := range getUsersTestCases {
@@ -326,7 +335,12 @@ func TestUserDetail(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE users")
 	dbConn.Exec("insert into users (id, first_name, last_name, age, email, password, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1','1',22,'test@gmail.com','$2a$14$RCDw54cGcHMwW2HbYtVb8uteFuwNcINqjPCbaG3xL5K34hknc3ta6','2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2','2',37,'ishii@gmail.com','$2a$14$RCDw54cGcHMwW2HbYtVb8uteFuwNcINqjPCbaG3xL5K34hknc3ta6', '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	userHandler := NewUserHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	userHandler := NewUserHandler(dbConn, zapLogger)
 	r.GET("/users/:id", userHandler.GetUserDetail)
 
 	for _, tt := range getUserDetailTestCases {
@@ -370,7 +384,12 @@ func TestDeleteUser(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE users")
 	dbConn.Exec("insert into users (id, first_name, last_name, age, email, password, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1','1',22,'test@gmail.com','$2a$14$RCDw54cGcHMwW2HbYtVb8uteFuwNcINqjPCbaG3xL5K34hknc3ta6','2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2','2',37,'ishii@gmail.com','$2a$14$RCDw54cGcHMwW2HbYtVb8uteFuwNcINqjPCbaG3xL5K34hknc3ta6', '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	userHandler := NewUserHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	userHandler := NewUserHandler(dbConn, zapLogger)
 	r.DELETE("/users/:id", userHandler.DeleteUser)
 
 	for _, tt := range deleteUserTestCases {

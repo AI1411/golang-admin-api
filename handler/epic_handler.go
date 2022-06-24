@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/AI1411/golang-admin-api/util/appcontext"
+	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/AI1411/golang-admin-api/models"
@@ -10,11 +12,15 @@ import (
 )
 
 type EpicHandler struct {
-	Db *gorm.DB
+	Db     *gorm.DB
+	logger *zap.Logger
 }
 
-func NewEpicHandler(db *gorm.DB) *EpicHandler {
-	return &EpicHandler{Db: db}
+func NewEpicHandler(db *gorm.DB, logger *zap.Logger) *EpicHandler {
+	return &EpicHandler{
+		Db:     db,
+		logger: logger,
+	}
 }
 
 type searchEpicParams struct {
@@ -30,9 +36,11 @@ type searchEpicParams struct {
 }
 
 func (h *EpicHandler) GetEpics(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var params searchEpicParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
@@ -64,9 +72,11 @@ func (h *EpicHandler) GetEpicDetail(ctx *gin.Context) {
 }
 
 func (h *EpicHandler) CreateEpic(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var epic models.Epic
 	if err := ctx.ShouldBindJSON(&epic); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
@@ -89,8 +99,10 @@ func (h *EpicHandler) UpdateEpic(ctx *gin.Context) {
 		}
 		return
 	}
+	traceID := appcontext.GetTraceID(ctx)
 	if err := ctx.ShouldBindJSON(&epic); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}

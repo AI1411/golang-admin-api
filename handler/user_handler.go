@@ -2,6 +2,8 @@ package handler
 
 import (
 	"encoding/csv"
+	"github.com/AI1411/golang-admin-api/util/appcontext"
+	"go.uber.org/zap"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +18,8 @@ import (
 )
 
 type UserHandler struct {
-	Db *gorm.DB
+	Db     *gorm.DB
+	logger *zap.Logger
 }
 
 type searchUserParams struct {
@@ -28,14 +31,19 @@ type searchUserParams struct {
 	Limit     string `form:"limit,default=10" binding:"omitempty,numeric"`
 }
 
-func NewUserHandler(db *gorm.DB) *UserHandler {
-	return &UserHandler{Db: db}
+func NewUserHandler(db *gorm.DB, logger *zap.Logger) *UserHandler {
+	return &UserHandler{
+		Db:     db,
+		logger: logger,
+	}
 }
 
 func (h *UserHandler) GetAllUser(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var params searchUserParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind query params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}

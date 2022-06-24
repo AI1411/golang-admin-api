@@ -4,6 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/AI1411/golang-admin-api/middleware"
+	logger "github.com/AI1411/golang-admin-api/server"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -154,7 +158,12 @@ func TestGetProjects(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE projects")
 	dbConn.Exec("insert into projects (id, project_title, project_description, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1','1','2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2','2', '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	projectHandler := NewProjectHandler(dbConn, nil)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	projectHandler := NewProjectHandler(dbConn, nil, zapLogger)
 	r.GET("/projects", projectHandler.GetProjects)
 
 	for _, tt := range getProjectsTestCases {
@@ -211,7 +220,12 @@ func TestProjectDetail(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE projects")
 	dbConn.Exec("insert into projects (id, project_title, project_description, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1','1','2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2','2', '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	projectHandler := NewProjectHandler(dbConn, nil)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	projectHandler := NewProjectHandler(dbConn, nil, zapLogger)
 	r.GET("/projects/:id", projectHandler.GetProjectDetail)
 
 	for _, tt := range getProjectDetailTestCases {
@@ -279,11 +293,16 @@ func TestCreateProject(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE projects")
 	r := gin.New()
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
 	mockCtrl := gomock.NewController(t)
 	uuidGen := mock_models.NewMockUUIDGenerator(mockCtrl)
 	uuidGen.EXPECT().GenerateUUID().Return(projectIDForTest)
 
-	projectHandler := NewProjectHandler(dbConn, uuidGen)
+	projectHandler := NewProjectHandler(dbConn, uuidGen, zapLogger)
 	r.POST("/projects", projectHandler.CreateProject)
 
 	for _, tt := range createProjectTestCases {
@@ -328,7 +347,12 @@ func TestDeleteProject(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE projects")
 	dbConn.Exec("insert into projects (id, project_title, project_description, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1','1','2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2','2', '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	projectHandler := NewProjectHandler(dbConn, nil)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	projectHandler := NewProjectHandler(dbConn, nil, zapLogger)
 	r.DELETE("/projects/:id", projectHandler.DeleteProject)
 
 	for _, tt := range deleteProjectTestCases {

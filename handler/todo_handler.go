@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/AI1411/golang-admin-api/util/appcontext"
 	"net/http"
 
 	"go.uber.org/zap"
@@ -35,10 +36,11 @@ type searchTodoPrams struct {
 }
 
 func (h *TodoHandler) GetAll(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var params searchTodoPrams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		res := createValidateErrorResponse(err)
-		res.outputErrorLog(h.logger, "failed to bind query params", "a", err)
+		res.outputErrorLog(h.logger, "failed to bind query params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}

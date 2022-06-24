@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/AI1411/golang-admin-api/util/appcontext"
+	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,11 +13,15 @@ import (
 )
 
 type CouponHandler struct {
-	Db *gorm.DB
+	Db     *gorm.DB
+	logger *zap.Logger
 }
 
-func NewCouponHandler(db *gorm.DB) *CouponHandler {
-	return &CouponHandler{Db: db}
+func NewCouponHandler(db *gorm.DB, logger *zap.Logger) *CouponHandler {
+	return &CouponHandler{
+		Db:     db,
+		logger: logger,
+	}
 }
 
 type searchCouponParams struct {
@@ -38,9 +44,11 @@ type searchCouponParams struct {
 }
 
 func (h *CouponHandler) GetAllCoupon(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var params searchCouponParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind query params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}

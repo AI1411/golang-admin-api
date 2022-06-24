@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/AI1411/golang-admin-api/util/appcontext"
+	"go.uber.org/zap"
 	"log"
 	"net/http"
 
@@ -14,11 +16,13 @@ import (
 type ProjectHandler struct {
 	Db            *gorm.DB
 	uuidGenerator models.UUIDGenerator
+	logger        *zap.Logger
 }
 
-func NewProjectHandler(db *gorm.DB, uuidGenerator models.UUIDGenerator) *ProjectHandler {
+func NewProjectHandler(db *gorm.DB, uuidGenerator models.UUIDGenerator, logger *zap.Logger) *ProjectHandler {
 	return &ProjectHandler{
 		Db:            db,
+		logger:        logger,
 		uuidGenerator: uuidGenerator,
 	}
 }
@@ -30,9 +34,11 @@ type searchProjectParams struct {
 }
 
 func (h *ProjectHandler) GetProjects(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var params searchProjectParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
@@ -64,9 +70,11 @@ func (h *ProjectHandler) GetProjectDetail(ctx *gin.Context) {
 }
 
 func (h *ProjectHandler) CreateProject(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var project models.Project
 	if err := ctx.ShouldBindJSON(&project); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
@@ -90,8 +98,10 @@ func (h *ProjectHandler) UpdateProject(ctx *gin.Context) {
 		}
 		return
 	}
+	traceID := appcontext.GetTraceID(ctx)
 	if err := ctx.ShouldBindJSON(&project); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}

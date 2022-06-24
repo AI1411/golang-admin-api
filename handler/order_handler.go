@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/AI1411/golang-admin-api/util/appcontext"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 
@@ -12,11 +14,15 @@ import (
 )
 
 type OrderHandler struct {
-	Db *gorm.DB
+	Db     *gorm.DB
+	logger *zap.Logger
 }
 
-func NewOrderHandler(db *gorm.DB) *OrderHandler {
-	return &OrderHandler{Db: db}
+func NewOrderHandler(db *gorm.DB, logger *zap.Logger) *OrderHandler {
+	return &OrderHandler{
+		Db:     db,
+		logger: logger,
+	}
 }
 
 type searchOrderParams struct {
@@ -29,9 +35,11 @@ type searchOrderParams struct {
 }
 
 func (h *OrderHandler) GetOrders(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var params searchOrderParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
@@ -62,9 +70,11 @@ func (h *OrderHandler) GetOrder(ctx *gin.Context) {
 }
 
 func (h *OrderHandler) CreateOrder(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	order := models.Order{}
 	if err := ctx.ShouldBindJSON(&order); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
@@ -113,8 +123,10 @@ func (h *OrderHandler) UpdateOrder(ctx *gin.Context) {
 		}
 		return
 	}
+	traceID := appcontext.GetTraceID(ctx)
 	if err := ctx.ShouldBindJSON(&order); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}

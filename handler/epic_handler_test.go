@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/AI1411/golang-admin-api/middleware"
+	logger "github.com/AI1411/golang-admin-api/server"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -291,7 +294,12 @@ func TestGetEpics(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE epics")
 	require.NoError(t, dbConn.Exec("INSERT INTO go.epics (id, is_open, author_id, epic_title, epic_description, label, milestone_id, assignee_id,project_id, created_at, updated_at) VALUES (1, 1, '239fabd9-03da-4cd6-bffd-131544f12b5f', 'epic', 'epic', 'epic', '239fabd9-03da-4cd6-bffd-131544f12b5f','239fabd9-03da-4cd6-bffd-131544f12b5f', '239fabd9-03da-4cd6-bffd-131544f12b5f', '2022-06-22 07:48:17','2022-06-22 07:48:17'),(2, 1, '239fabd9-03da-4cd6-bffd-131544f12b5d', 'test', 'test', 'test', '239fabd9-03da-4cd6-bffd-131544f12b5d','239fabd9-03da-4cd6-bffd-131544f12b5d', '239fabd9-03da-4cd6-bffd-131544f12b5d', '2022-06-22 07:48:19','2022-06-22 07:48:19');").Error)
 	r := gin.New()
-	epicHandler := NewEpicHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	epicHandler := NewEpicHandler(dbConn, zapLogger)
 	r.GET("/epics", epicHandler.GetEpics)
 
 	for _, tt := range getEpicsTestCases {
@@ -355,7 +363,12 @@ func TestEpicDetail(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE epics")
 	require.NoError(t, dbConn.Exec("INSERT INTO go.epics (id, is_open, author_id, epic_title, epic_description, label, milestone_id, assignee_id,project_id, created_at, updated_at) VALUES (1, 1, '239fabd9-03da-4cd6-bffd-131544f12b5f', 'epic', 'epic', 'epic', '239fabd9-03da-4cd6-bffd-131544f12b5f','239fabd9-03da-4cd6-bffd-131544f12b5f', '239fabd9-03da-4cd6-bffd-131544f12b5f', '2022-06-22 07:48:17','2022-06-22 07:48:17'),(2, 1, '239fabd9-03da-4cd6-bffd-131544f12b5d', 'test', 'test', 'test', '239fabd9-03da-4cd6-bffd-131544f12b5d','239fabd9-03da-4cd6-bffd-131544f12b5d', '239fabd9-03da-4cd6-bffd-131544f12b5d', '2022-06-22 07:48:19','2022-06-22 07:48:19');").Error)
 	r := gin.New()
-	epicHandler := NewEpicHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	epicHandler := NewEpicHandler(dbConn, zapLogger)
 	r.GET("/epics/:id", epicHandler.GetEpicDetail)
 
 	for _, tt := range getEpicDetailTestCases {
@@ -399,7 +412,12 @@ func TestDeleteEpic(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE epics")
 	require.NoError(t, dbConn.Exec("INSERT INTO go.epics (id, is_open, author_id, epic_title, epic_description, label, milestone_id, assignee_id,project_id, created_at, updated_at) VALUES (1, 1, '239fabd9-03da-4cd6-bffd-131544f12b5f', 'epic', 'epic', 'epic', '239fabd9-03da-4cd6-bffd-131544f12b5f','239fabd9-03da-4cd6-bffd-131544f12b5f', '239fabd9-03da-4cd6-bffd-131544f12b5f', '2022-06-22 07:48:17','2022-06-22 07:48:17'),(2, 1, '239fabd9-03da-4cd6-bffd-131544f12b5d', 'test', 'test', 'test', '239fabd9-03da-4cd6-bffd-131544f12b5d','239fabd9-03da-4cd6-bffd-131544f12b5d', '239fabd9-03da-4cd6-bffd-131544f12b5d', '2022-06-22 07:48:19','2022-06-22 07:48:19');").Error)
 	r := gin.New()
-	epicHandler := NewEpicHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	epicHandler := NewEpicHandler(dbConn, zapLogger)
 	r.DELETE("/epics/:id", epicHandler.DeleteEpic)
 
 	for _, tt := range deleteEpicTestCases {

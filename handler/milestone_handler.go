@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"github.com/AI1411/golang-admin-api/util/appcontext"
+	"go.uber.org/zap"
 	"net/http"
 
 	"github.com/AI1411/golang-admin-api/models"
@@ -10,11 +12,15 @@ import (
 )
 
 type MilestoneHandler struct {
-	Db *gorm.DB
+	Db     *gorm.DB
+	logger *zap.Logger
 }
 
-func NewMilestoneHandler(db *gorm.DB) *MilestoneHandler {
-	return &MilestoneHandler{Db: db}
+func NewMilestoneHandler(db *gorm.DB, logger *zap.Logger) *MilestoneHandler {
+	return &MilestoneHandler{
+		Db:     db,
+		logger: logger,
+	}
 }
 
 type searchMilestoneParams struct {
@@ -25,9 +31,11 @@ type searchMilestoneParams struct {
 }
 
 func (h *MilestoneHandler) GetMilestones(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var params searchMilestoneParams
 	if err := ctx.ShouldBindQuery(&params); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
@@ -59,9 +67,11 @@ func (h *MilestoneHandler) GetMilestoneDetail(ctx *gin.Context) {
 }
 
 func (h *MilestoneHandler) CreateMilestone(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
 	var milestone models.Milestone
 	if err := ctx.ShouldBindJSON(&milestone); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
@@ -87,8 +97,10 @@ func (h *MilestoneHandler) UpdateMileStone(ctx *gin.Context) {
 		}
 		return
 	}
+	traceID := appcontext.GetTraceID(ctx)
 	if err := ctx.ShouldBindJSON(&milestone); err != nil {
 		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}

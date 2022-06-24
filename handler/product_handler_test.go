@@ -4,6 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/AI1411/golang-admin-api/middleware"
+	logger "github.com/AI1411/golang-admin-api/server"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -255,7 +259,12 @@ func TestGetProducts(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE products")
 	dbConn.Exec("insert into products (id, product_name, price,remarks,quantity, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1',100,'1',1,'2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2',1000,'2',10, '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	productHandler := NewProductHandler(dbConn, nil)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	productHandler := NewProductHandler(dbConn, nil, zapLogger)
 	r.GET("/products", productHandler.GetAllProduct)
 
 	for _, tt := range getProductsTestCases {
@@ -313,7 +322,12 @@ func TestProductDetail(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE products")
 	dbConn.Exec("insert into products (id, product_name, price,remarks,quantity, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1',100,'1',1,'2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2',1000,'2',10, '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	productHandler := NewProductHandler(dbConn, nil)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	productHandler := NewProductHandler(dbConn, nil, zapLogger)
 	r.GET("/products/:id", productHandler.GetProductDetail)
 
 	for _, tt := range getProductDetailTestCases {
@@ -392,11 +406,16 @@ func TestCreateProduct(t *testing.T) {
 	dbConn := db.Init()
 	dbConn.Exec("TRUNCATE TABLE products")
 	r := gin.New()
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
 	mockCtrl := gomock.NewController(t)
 	uuidGen := mock_models.NewMockUUIDGenerator(mockCtrl)
 	uuidGen.EXPECT().GenerateUUID().Return(productIDForTest)
 
-	productHandler := NewProductHandler(dbConn, uuidGen)
+	productHandler := NewProductHandler(dbConn, uuidGen, zapLogger)
 	r.POST("/products", productHandler.CreateProduct)
 
 	for _, tt := range createProductTestCases {
@@ -441,7 +460,12 @@ func TestDeleteProduct(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE products")
 	dbConn.Exec("insert into products (id, product_name, price,remarks,quantity, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1',100,'1',1,'2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2',1000,'2',10, '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	productHandler := NewProductHandler(dbConn, nil)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	productHandler := NewProductHandler(dbConn, nil, zapLogger)
 	r.DELETE("/products/:id", productHandler.DeleteProduct)
 
 	for _, tt := range deleteProductTestCases {

@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/AI1411/golang-admin-api/middleware"
+	logger "github.com/AI1411/golang-admin-api/server"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -190,7 +193,12 @@ func TestGetMilestones(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE milestones")
 	require.NoError(t, dbConn.Exec("INSERT INTO milestones (id, milestone_title, milestone_description, project_id, created_at, updated_at) VALUES ('de1ccf61-4f17-4f51-8a72-b12d1e5e4191', 'なる早', 'test description', '239fabd9-03da-4cd6-bffd-131544f12b5d','2022-06-23 07:10:25', '2022-06-23 07:10:25'),('86b806e6-f34f-403b-b854-d31a79e2195e', 'first', 'first', '239fabd9-03da-4cd6-bffd-131544f12b5f','2022-06-23 07:10:47', '2022-06-23 07:10:47');").Error)
 	r := gin.New()
-	milestoneHandler := NewMilestoneHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	milestoneHandler := NewMilestoneHandler(dbConn, zapLogger)
 	r.GET("/milestones", milestoneHandler.GetMilestones)
 
 	for _, tt := range getMilestonesTestCases {
@@ -249,7 +257,12 @@ func TestMilestoneDetail(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE milestones")
 	require.NoError(t, dbConn.Exec("INSERT INTO milestones (id, milestone_title, milestone_description, project_id, created_at, updated_at) VALUES ('de1ccf61-4f17-4f51-8a72-b12d1e5e4191', 'なる早', 'test description', '239fabd9-03da-4cd6-bffd-131544f12b5d','2022-06-23 07:10:25', '2022-06-23 07:10:25'),('86b806e6-f34f-403b-b854-d31a79e2195e', 'first', 'first', '239fabd9-03da-4cd6-bffd-131544f12b5f','2022-06-23 07:10:47', '2022-06-23 07:10:47');").Error)
 	r := gin.New()
-	milestoneHandler := NewMilestoneHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	milestoneHandler := NewMilestoneHandler(dbConn, zapLogger)
 	r.GET("/milestones/:id", milestoneHandler.GetMilestoneDetail)
 
 	for _, tt := range getMilestoneDetailTestCases {
@@ -293,7 +306,12 @@ func TestDeleteMilestone(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE milestones")
 	require.NoError(t, dbConn.Exec("INSERT INTO milestones (id, milestone_title, milestone_description, project_id, created_at, updated_at) VALUES ('de1ccf61-4f17-4f51-8a72-b12d1e5e4191', 'なる早', 'test description', '239fabd9-03da-4cd6-bffd-131544f12b5d','2022-06-23 07:10:25', '2022-06-23 07:10:25'),('86b806e6-f34f-403b-b854-d31a79e2195e', 'first', 'first', '239fabd9-03da-4cd6-bffd-131544f12b5f','2022-06-23 07:10:47', '2022-06-23 07:10:47');").Error)
 	r := gin.New()
-	milestoneHandler := NewMilestoneHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	milestoneHandler := NewMilestoneHandler(dbConn, zapLogger)
 	r.DELETE("/milestones/:id", milestoneHandler.DeleteMilestone)
 
 	for _, tt := range deleteMilestoneTestCases {

@@ -2,6 +2,9 @@ package handler
 
 import (
 	"fmt"
+	"github.com/AI1411/golang-admin-api/middleware"
+	logger "github.com/AI1411/golang-admin-api/server"
+	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -639,7 +642,12 @@ func TestGetCoupons(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE coupons")
 	require.NoError(t, dbConn.Exec("INSERT INTO coupons (id, title, remarks, discount_amount, discount_rate, max_discount_amount, use_start_at,use_end_at, public_start_at, public_end_at, is_public, is_premium, created_at, updated_at) VALUES ('090e142d-baa3-4039-9d21-cf5a1af39094', 'coupon', 'coupon', 1000, null, null, '2022-06-01 00:00:00','2030-07-02 10:00:00', '2022-06-01 00:00:00', '2030-07-02 10:00:00', 0, 0, '2022-06-14 08:19:41','2022-06-15 10:31:50'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9', 'test', 'test', null, 20, 2000, '2022-07-01 00:00:00','2032-07-02 10:00:00', '2022-07-01 00:00:00', '2032-07-02 10:00:00', 1, 1, '2022-06-14 08:19:12','2022-06-14 08:19:12');").Error)
 	r := gin.New()
-	couponHandler := NewCouponHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	couponHandler := NewCouponHandler(dbConn, zapLogger)
 	r.GET("/coupons", couponHandler.GetAllCoupon)
 
 	for _, tt := range getCouponsTestCases {
@@ -706,7 +714,12 @@ func TestCouponDetail(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE coupons")
 	require.NoError(t, dbConn.Exec("INSERT INTO coupons (id, title, remarks, discount_amount, discount_rate, max_discount_amount, use_start_at,use_end_at, public_start_at, public_end_at, is_public, is_premium, created_at, updated_at) VALUES ('090e142d-baa3-4039-9d21-cf5a1af39094', 'coupon', 'coupon', 1000, null, null, '2022-06-01 00:00:00','2030-07-02 10:00:00', '2022-06-01 00:00:00', '2030-07-02 10:00:00', 0, 0, '2022-06-14 08:19:41','2022-06-15 10:31:50'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9', 'test', 'test', null, 20, 2000, '2022-07-01 00:00:00','2032-07-02 10:00:00', '2022-07-01 00:00:00', '2032-07-02 10:00:00', 1, 1, '2022-06-14 08:19:12','2022-06-14 08:19:12');").Error)
 	r := gin.New()
-	couponHandler := NewCouponHandler(dbConn)
+	zapLogger, err := logger.NewLogger(true)
+	require.NoError(t, err)
+	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
+	r.Use(middleware.NewTracing())
+	r.Use(middleware.NewLogging(zapLogger))
+	couponHandler := NewCouponHandler(dbConn, zapLogger)
 	r.GET("/coupons/:id", couponHandler.GetCouponDetail)
 
 	for _, tt := range getCouponDetailTestCases {
