@@ -11,9 +11,11 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/AI1411/golang-admin-api/db"
+	"github.com/AI1411/golang-admin-api/models/mock_model"
 )
 
 const productIDForTest = "090e142d-baa3-4039-9d21-cf5a1af39094"
@@ -37,18 +39,14 @@ var getProductsTestCases = []struct {
 					"product_name": "1",
 					"price": 100,
 					"remarks": "1",
-					"quantity": 1,
-					"created_at": "2022-06-20T22:14:22+09:00",
-					"updated_at": "2022-06-20T22:14:22+09:00"
+					"quantity": 1
 				},
 				{
 					"id": "5c3325c1-d539-42d6-b405-2af2f6b99ed9",
 					"product_name": "2",
 					"price": 1000,
 					"remarks": "2",
-					"quantity": 10,
-					"created_at": "2022-06-20T22:14:23+09:00",
-					"updated_at": "2022-06-20T22:14:23+09:00"
+					"quantity": 10
 				}
 			],
 			"total": 2
@@ -124,9 +122,7 @@ var getProductsTestCases = []struct {
 					"product_name": "1",
 					"price": 100,
 					"remarks": "1",
-					"quantity": 1,
-					"created_at": "2022-06-20T22:14:22+09:00",
-					"updated_at": "2022-06-20T22:14:22+09:00"
+					"quantity": 1
 				}
 			],
 			"total": 1
@@ -146,9 +142,7 @@ var getProductsTestCases = []struct {
 					"product_name": "2",
 					"price": 1000,
 					"remarks": "2",
-					"quantity": 10,
-					"created_at": "2022-06-20T22:14:23+09:00",
-					"updated_at": "2022-06-20T22:14:23+09:00"
+					"quantity": 10
 				}
 			],
 			"total": 1
@@ -168,9 +162,7 @@ var getProductsTestCases = []struct {
 					"product_name": "1",
 					"price": 100,
 					"remarks": "1",
-					"quantity": 1,
-					"created_at": "2022-06-20T22:14:22+09:00",
-					"updated_at": "2022-06-20T22:14:22+09:00"
+					"quantity": 1
 				}
 			],
 			"total": 1
@@ -190,9 +182,7 @@ var getProductsTestCases = []struct {
 					"product_name": "1",
 					"price": 100,
 					"remarks": "1",
-					"quantity": 1,
-					"created_at": "2022-06-20T22:14:22+09:00",
-					"updated_at": "2022-06-20T22:14:22+09:00"
+					"quantity": 1
 				}
 			],
 			"total": 1
@@ -212,9 +202,7 @@ var getProductsTestCases = []struct {
 					"product_name": "1",
 					"price": 100,
 					"remarks": "1",
-					"quantity": 1,
-					"created_at": "2022-06-20T22:14:22+09:00",
-					"updated_at": "2022-06-20T22:14:22+09:00"
+					"quantity": 1
 				}
 			],
 			"total": 1
@@ -234,9 +222,7 @@ var getProductsTestCases = []struct {
 					"product_name": "2",
 					"price": 1000,
 					"remarks": "2",
-					"quantity": 10,
-					"created_at": "2022-06-20T22:14:23+09:00",
-					"updated_at": "2022-06-20T22:14:23+09:00"
+					"quantity": 10
 				}
 			],
 			"total": 1
@@ -256,9 +242,7 @@ var getProductsTestCases = []struct {
 					"product_name": "1",
 					"price": 100,
 					"remarks": "1",
-					"quantity": 1,
-					"created_at": "2022-06-20T22:14:22+09:00",
-					"updated_at": "2022-06-20T22:14:22+09:00"
+					"quantity": 1
 				}
 			],
 			"total": 1
@@ -271,7 +255,7 @@ func TestGetProducts(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE products")
 	dbConn.Exec("insert into products (id, product_name, price,remarks,quantity, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1',100,'1',1,'2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2',1000,'2',10, '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	productHandler := NewProductHandler(dbConn)
+	productHandler := NewProductHandler(dbConn, nil)
 	r.GET("/products", productHandler.GetAllProduct)
 
 	for _, tt := range getProductsTestCases {
@@ -312,9 +296,7 @@ var getProductDetailTestCases = []struct {
 			"product_name": "1",
 			"price": 100,
 			"remarks": "1",
-			"quantity": 1,
-			"created_at": "2022-06-20T22:14:22+09:00",
-			"updated_at": "2022-06-20T22:14:22+09:00"
+			"quantity": 1
 		}`,
 	},
 	{
@@ -331,7 +313,7 @@ func TestProductDetail(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE products")
 	dbConn.Exec("insert into products (id, product_name, price,remarks,quantity, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1',100,'1',1,'2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2',1000,'2',10, '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	productHandler := NewProductHandler(dbConn)
+	productHandler := NewProductHandler(dbConn, nil)
 	r.GET("/products/:id", productHandler.GetProductDetail)
 
 	for _, tt := range getProductDetailTestCases {
@@ -341,6 +323,90 @@ func TestProductDetail(t *testing.T) {
 			var req *http.Request
 			rec := httptest.NewRecorder()
 			req = httptest.NewRequest(http.MethodGet, "/products/"+tt.productID, nil)
+			r.ServeHTTP(rec, req)
+			assert.Equal(t, tt.wantStatus, rec.Code)
+			assert.JSONEq(t, tt.wantBody, rec.Body.String())
+		})
+	}
+}
+
+var createProductTestCases = []struct {
+	tid        int
+	name       string
+	request    map[string]interface{}
+	wantStatus int
+	wantBody   string
+}{
+	{
+		tid:  1,
+		name: "プロジェクトが正常に作成できること",
+		request: map[string]interface{}{
+			"product_name": "test",
+			"price":        1,
+			"remarks":      "update",
+			"quantity":     1,
+		},
+		wantStatus: http.StatusCreated,
+		wantBody: `{
+			"id": "090e142d-baa3-4039-9d21-cf5a1af39094",
+			"product_name": "test",
+			"price": 1,
+			"remarks": "update",
+			"quantity": 1
+		}`,
+	},
+	{
+		tid:  2,
+		name: "バリデーションエラー",
+		request: map[string]interface{}{
+			"product_name": strings.Repeat("a", 65),
+			"remarks":      strings.Repeat("a", 256),
+		},
+		wantStatus: http.StatusBadRequest,
+		wantBody: `{
+			"code": 400,
+			"message": "パラメータが不正です",
+			"details": [
+				{
+					"attribute": "ProductName",
+					"message": "ProductNameは不正です"
+				},
+				{
+					"attribute": "Price",
+					"message": "Priceは必須です"
+				},
+				{
+					"attribute": "Remarks",
+					"message": "備考は不正です"
+				},
+				{
+					"attribute": "Quantity",
+					"message": "数量は必須です"
+				}
+			]
+		}`,
+	},
+}
+
+func TestCreateProduct(t *testing.T) {
+	dbConn := db.Init()
+	dbConn.Exec("TRUNCATE TABLE products")
+	r := gin.New()
+	mockCtrl := gomock.NewController(t)
+	uuidGen := mock_models.NewMockUUIDGenerator(mockCtrl)
+	uuidGen.EXPECT().GenerateUUID().Return(productIDForTest)
+
+	productHandler := NewProductHandler(dbConn, uuidGen)
+	r.POST("/products", productHandler.CreateProduct)
+
+	for _, tt := range createProductTestCases {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			var req *http.Request
+			rec := httptest.NewRecorder()
+			jsonStr, _ := json.Marshal(tt.request)
+			req = httptest.NewRequest(http.MethodPost, "/products", bytes.NewBuffer(jsonStr))
 			r.ServeHTTP(rec, req)
 			assert.Equal(t, tt.wantStatus, rec.Code)
 			assert.JSONEq(t, tt.wantBody, rec.Body.String())
@@ -375,7 +441,7 @@ func TestDeleteProduct(t *testing.T) {
 	dbConn.Exec("TRUNCATE TABLE products")
 	dbConn.Exec("insert into products (id, product_name, price,remarks,quantity, created_at, updated_at)values('090e142d-baa3-4039-9d21-cf5a1af39094','1',100,'1',1,'2022-06-20 22:14:22','2022-06-20 22:14:22'),('5c3325c1-d539-42d6-b405-2af2f6b99ed9','2',1000,'2',10, '2022-06-20 22:14:23', '2022-06-20 22:14:23');")
 	r := gin.New()
-	productHandler := NewProductHandler(dbConn)
+	productHandler := NewProductHandler(dbConn, nil)
 	r.DELETE("/products/:id", productHandler.DeleteProduct)
 
 	for _, tt := range deleteProductTestCases {

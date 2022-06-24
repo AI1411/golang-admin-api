@@ -14,7 +14,7 @@ func Router() *gin.Engine {
 	todoHandler := handler.NewTodoHandler(dbConn)
 	userHandler := handler.NewUserHandler(dbConn)
 	authHandler := handler.NewAuthHandler(dbConn)
-	productHandler := handler.NewProductHandler(dbConn)
+	productHandler := handler.NewProductHandler(dbConn, uuidGen)
 	orderHandler := handler.NewOrderHandler(dbConn)
 	orderDetailHandler := handler.NewOrderDetailHandler(dbConn)
 	couponHandler := handler.NewCouponHandler(dbConn)

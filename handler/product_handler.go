@@ -11,11 +11,15 @@ import (
 )
 
 type ProductHandler struct {
-	Db *gorm.DB
+	Db            *gorm.DB
+	uuidGenerator models.UUIDGenerator
 }
 
-func NewProductHandler(db *gorm.DB) *ProductHandler {
-	return &ProductHandler{Db: db}
+func NewProductHandler(db *gorm.DB, uuidGenerator models.UUIDGenerator) *ProductHandler {
+	return &ProductHandler{
+		Db:            db,
+		uuidGenerator: uuidGenerator,
+	}
 }
 
 type searchProductParams struct {
@@ -69,7 +73,7 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
 	}
-	product.CreateUUID()
+	product.ID = h.uuidGenerator.GenerateUUID()
 	if err := h.Db.Create(&product).Error; err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to create product", err))
 		return
