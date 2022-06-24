@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
-	"github.com/AI1411/golang-admin-api/util"
 	"log"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/AI1411/golang-admin-api/util"
 
 	"github.com/urfave/cli/v2"
 
@@ -26,7 +27,9 @@ func export(args []string) error {
 			fileDir := "assets/csv/orders/" + strconv.Itoa(year) +
 				"/" + strconv.Itoa(int(month)) + "/" + strconv.Itoa(day) + "/"
 
-			util.CheckDir(fileDir)
+			if err := util.CheckDir(fileDir); err != nil {
+				return err
+			}
 
 			filePath := fileDir + fileName
 

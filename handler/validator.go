@@ -2,11 +2,12 @@ package handler
 
 import (
 	"errors"
-	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"reflect"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin/binding"
 
 	"github.com/go-playground/validator/v10"
 )

@@ -2,11 +2,12 @@ package handler
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -14,10 +15,7 @@ import (
 	"github.com/AI1411/golang-admin-api/db"
 )
 
-const (
-	couponIDForTest     = "090e142d-baa3-4039-9d21-cf5a1af39094"
-	userIDForCouponTest = "7dc41179-824e-4b8a-b894-2082ca5eac5b"
-)
+const couponIDForTest = "090e142d-baa3-4039-9d21-cf5a1af39094"
 
 var getCouponsTestCases = []struct {
 	tid        int

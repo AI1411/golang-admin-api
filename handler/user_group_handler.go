@@ -1,9 +1,10 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	"net/http"
 
 	"github.com/AI1411/golang-admin-api/models"
 	"github.com/AI1411/golang-admin-api/util/errors"
