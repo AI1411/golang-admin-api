@@ -228,28 +228,6 @@ func TestProjectDetail(t *testing.T) {
 	}
 }
 
-var deleteProjectTestCases = []struct {
-	tid        int
-	name       string
-	projectID  string
-	request    map[string]interface{}
-	wantStatus int
-	wantBody   string
-}{
-	{
-		tid:        1,
-		name:       "プロジェクトが正常に削除できること",
-		projectID:  projectIDForTest,
-		wantStatus: http.StatusNoContent,
-	},
-	{
-		tid:        2,
-		name:       "削除できるプロジェクトがない場合は404エラー",
-		projectID:  "10",
-		wantStatus: http.StatusNotFound,
-	},
-}
-
 var createProjectTestCases = []struct {
 	tid        int
 	name       string
@@ -321,6 +299,28 @@ func TestCreateProject(t *testing.T) {
 			assert.JSONEq(t, tt.wantBody, rec.Body.String())
 		})
 	}
+}
+
+var deleteProjectTestCases = []struct {
+	tid        int
+	name       string
+	projectID  string
+	request    map[string]interface{}
+	wantStatus int
+	wantBody   string
+}{
+	{
+		tid:        1,
+		name:       "プロジェクトが正常に削除できること",
+		projectID:  projectIDForTest,
+		wantStatus: http.StatusNoContent,
+	},
+	{
+		tid:        2,
+		name:       "削除できるプロジェクトがない場合は404エラー",
+		projectID:  "10",
+		wantStatus: http.StatusNotFound,
+	},
 }
 
 func TestDeleteProject(t *testing.T) {
