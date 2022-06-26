@@ -40,30 +40,6 @@ func Router() *gin.Engine {
 	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
 	r.Use(middleware.NewTracing())
 	r.Use(middleware.NewLogging(zapLogger))
-	todos := r.Group("/todos")
-	{
-		todos.GET("", todoHandler.GetAll)
-		todos.GET("/:id", todoHandler.GetDetail)
-		todos.POST("", todoHandler.CreateTodo)
-		todos.PUT("/:id", todoHandler.UpdateTodo)
-		todos.DELETE("/:id", todoHandler.DeleteTodo)
-	}
-	users := r.Group("/users")
-	{
-		users.GET("", userHandler.GetAllUser)
-		users.GET("/:id", userHandler.GetUserDetail)
-		users.PUT("/:id", userHandler.UpdateUser)
-		users.DELETE("/:id", userHandler.DeleteUser)
-		users.POST("/exportCsv", userHandler.ExportCSV)
-	}
-	products := r.Group("/products")
-	{
-		products.GET("", productHandler.GetAllProduct)
-		products.GET("/:id", productHandler.GetProductDetail)
-		products.POST("", productHandler.CreateProduct)
-		products.PUT("/:id", productHandler.UpdateProduct)
-		products.DELETE("/:id", productHandler.DeleteProduct)
-	}
 	auth := r.Group("/auth")
 	{
 		auth.POST("/login", authHandler.Login)
@@ -71,7 +47,33 @@ func Router() *gin.Engine {
 		auth.POST("/register", authHandler.Register)
 		auth.GET("/me", authHandler.Me)
 	}
-	orders := r.Group("/orders")
+	authorized := r.Group("/")
+	authorized.Use(middleware.AuthenticateBearer())
+	todos := authorized.Group("/todos")
+	{
+		todos.GET("", todoHandler.GetAll)
+		todos.GET("/:id", todoHandler.GetDetail)
+		todos.POST("", todoHandler.CreateTodo)
+		todos.PUT("/:id", todoHandler.UpdateTodo)
+		todos.DELETE("/:id", todoHandler.DeleteTodo)
+	}
+	users := authorized.Group("/users")
+	{
+		users.GET("", userHandler.GetAllUser)
+		users.GET("/:id", userHandler.GetUserDetail)
+		users.PUT("/:id", userHandler.UpdateUser)
+		users.DELETE("/:id", userHandler.DeleteUser)
+		users.POST("/exportCsv", userHandler.ExportCSV)
+	}
+	products := authorized.Group("/products")
+	{
+		products.GET("", productHandler.GetAllProduct)
+		products.GET("/:id", productHandler.GetProductDetail)
+		products.POST("", productHandler.CreateProduct)
+		products.PUT("/:id", productHandler.UpdateProduct)
+		products.DELETE("/:id", productHandler.DeleteProduct)
+	}
+	orders := authorized.Group("/orders")
 	{
 		orders.POST("", orderHandler.CreateOrder)
 		orders.GET("", orderHandler.GetOrders)
@@ -79,14 +81,14 @@ func Router() *gin.Engine {
 		orders.PUT("/:id", orderHandler.UpdateOrder)
 		orders.DELETE("/:id", orderHandler.DeleteOrder)
 	}
-	orderDetails := r.Group("/orderDetails")
+	orderDetails := authorized.Group("/orderDetails")
 	{
 		orderDetails.GET("/:id", orderDetailHandler.GetOrderDetail)
 		orderDetails.POST("", orderDetailHandler.CreateOrderDetail)
 		orderDetails.PUT("/:id", orderDetailHandler.UpdateOrderDetail)
 		orderDetails.DELETE("/:id", orderDetailHandler.DeleteOrderDetail)
 	}
-	coupons := r.Group("/coupons")
+	coupons := authorized.Group("/coupons")
 	{
 		coupons.GET("/", couponHandler.GetAllCoupon)
 		coupons.GET("/:id", couponHandler.GetCouponDetail)
@@ -94,20 +96,20 @@ func Router() *gin.Engine {
 		coupons.PUT("/:id", couponHandler.UpdateCoupon)
 		coupons.POST("/:coupon_id/users/:user_id", couponHandler.AcquireCoupon)
 	}
-	userGroups := r.Group("/userGroups")
+	userGroups := authorized.Group("/userGroups")
 	{
 		userGroups.GET("", userGroupHandler.GetAllUserGroups)
 		userGroups.GET("/:id", userGroupHandler.GetUserGroupsDetail)
 		userGroups.POST("", userGroupHandler.CreateUserGroup)
 	}
-	milestones := r.Group("/milestones")
+	milestones := authorized.Group("/milestones")
 	{
 		milestones.GET("", milestoneHandler.GetMilestones)
 		milestones.GET("/:id", milestoneHandler.GetMilestoneDetail)
 		milestones.POST("", milestoneHandler.CreateMilestone)
 		milestones.PUT("/:id", milestoneHandler.UpdateMileStone)
 	}
-	epics := r.Group("/epics")
+	epics := authorized.Group("/epics")
 	{
 		epics.GET("", epicHandler.GetEpics)
 		epics.GET("/:id", epicHandler.GetEpicDetail)
@@ -115,7 +117,7 @@ func Router() *gin.Engine {
 		epics.PUT("/:id", epicHandler.UpdateEpic)
 		epics.DELETE("/:id", epicHandler.DeleteEpic)
 	}
-	projects := r.Group("/projects")
+	projects := authorized.Group("/projects")
 	{
 		projects.GET("", projectHandler.GetProjects)
 		projects.GET("/:id", projectHandler.GetProjectDetail)
