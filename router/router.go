@@ -67,6 +67,7 @@ func Router() *gin.Engine {
 	auth := r.Group("/auth")
 	{
 		auth.POST("/login", authHandler.Login)
+		auth.POST("/logout", authHandler.Logout)
 		auth.POST("/register", authHandler.Register)
 		auth.GET("/me", authHandler.Me)
 	}

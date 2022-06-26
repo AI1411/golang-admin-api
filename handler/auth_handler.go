@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/AI1411/golang-admin-api/util/appcontext"
+	"github.com/AI1411/golang-admin-api/util/redis"
 	"go.uber.org/zap"
 	"net/http"
 	"time"
@@ -121,8 +122,8 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 		})
 		return
 	}
+	redis.NewSession(ctx, "jwt", token)
 
-	ctx.SetCookie("jwt", token, 3600, "/", "localhost", false, true)
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "認証に成功しました",
 		"value":   token,
@@ -131,7 +132,11 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 }
 
 func (h *AuthHandler) Me(ctx *gin.Context) {
-	cookie := ctx.Request.Header.Get("Cookie")
+	cookie, err := redis.GetSession(ctx, "jwt")
+	if err != nil {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "認証に失敗しました"})
+		return
+	}
 
 	id, err := util.ParseJwt(cookie)
 	if err != nil {
@@ -163,5 +168,12 @@ func (h *AuthHandler) Me(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "its me!",
 		"user":    user,
+	})
+}
+
+func (h *AuthHandler) Logout(ctx *gin.Context) {
+	redis.DeleteSession(ctx, "jwt")
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "logout!",
 	})
 }
