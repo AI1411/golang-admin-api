@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/AI1411/golang-admin-api/middleware"
-	logger "github.com/AI1411/golang-admin-api/server"
-	"github.com/gin-gonic/gin/binding"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
+
+	"github.com/AI1411/golang-admin-api/middleware"
+	logger "github.com/AI1411/golang-admin-api/server"
+	"github.com/gin-gonic/gin/binding"
 
 	"github.com/stretchr/testify/require"
 

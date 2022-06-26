@@ -1,10 +1,11 @@
 package handler
 
 import (
-	"github.com/AI1411/golang-admin-api/util/appcontext"
-	"go.uber.org/zap"
 	"log"
 	"net/http"
+
+	"github.com/AI1411/golang-admin-api/util/appcontext"
+	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"

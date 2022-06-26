@@ -1,9 +1,10 @@
 package appcontext_test
 
 import (
-	"github.com/AI1411/golang-admin-api/util/appcontext"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/AI1411/golang-admin-api/util/appcontext"
 
 	"github.com/gin-gonic/gin"
 )

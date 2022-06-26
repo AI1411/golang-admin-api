@@ -4,9 +4,10 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"io"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v9"
-	"io"
 )
 
 var redisConn *redis.Client

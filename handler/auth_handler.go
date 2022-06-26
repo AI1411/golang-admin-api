@@ -1,11 +1,12 @@
 package handler
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/AI1411/golang-admin-api/util/appcontext"
 	"github.com/AI1411/golang-admin-api/util/redis"
 	"go.uber.org/zap"
-	"net/http"
-	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
