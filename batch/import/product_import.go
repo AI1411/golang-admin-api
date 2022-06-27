@@ -10,7 +10,7 @@ import (
 	"golang.org/x/text/transform"
 )
 
-func import_product_from_csv() error {
+func importProductFromCsv() error {
 	f, err := os.Open("33OKAYAM 2.CSV")
 	if err != nil {
 		log.Fatal(err)
@@ -30,7 +30,7 @@ func import_product_from_csv() error {
 
 func main() {
 	fmt.Println("商品一覧CSVインポートを開始します。")
-	if err := import_product_from_csv(); err != nil {
+	if err := importProductFromCsv(); err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("商品一覧CSVインポートを開始します。")
