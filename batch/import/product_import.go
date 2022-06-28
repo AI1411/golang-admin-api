@@ -40,7 +40,6 @@ func newProduct(id, name, price, remarks, quantity string) error {
 		Remarks:     remarks,
 		Quantity:    _quantity,
 	}
-	log.Println(product)
 	dbConn := db.Init()
 	if err := dbConn.Create(&product).Error; err != nil {
 		return err
