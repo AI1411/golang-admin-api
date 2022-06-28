@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/urfave/cli/v2"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/google/uuid"
+	"github.com/urfave/cli/v2"
 )
 
 func makeUUID() error {

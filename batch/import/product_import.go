@@ -3,13 +3,15 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
-	"github.com/AI1411/golang-admin-api/db"
-	"github.com/AI1411/golang-admin-api/models"
-	"golang.org/x/text/encoding/japanese"
-	"golang.org/x/text/transform"
 	"log"
 	"os"
 	"strconv"
+
+	"golang.org/x/text/encoding/japanese"
+	"golang.org/x/text/transform"
+
+	"github.com/AI1411/golang-admin-api/db"
+	"github.com/AI1411/golang-admin-api/models"
 )
 
 func importProductFromCsv() error {
