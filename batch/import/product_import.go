@@ -3,15 +3,17 @@ package main
 import (
 	"encoding/csv"
 	"fmt"
-	"log"
-	"os"
-
+	"github.com/AI1411/golang-admin-api/db"
+	"github.com/AI1411/golang-admin-api/models"
 	"golang.org/x/text/encoding/japanese"
 	"golang.org/x/text/transform"
+	"log"
+	"os"
+	"strconv"
 )
 
 func importProductFromCsv() error {
-	f, err := os.Open("33OKAYAM 2.CSV")
+	f, err := os.Open("product.CSV")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -19,13 +21,31 @@ func importProductFromCsv() error {
 	defer f.Close()
 
 	r := csv.NewReader(transform.NewReader(f, japanese.ShiftJIS.NewDecoder()))
-	for {
-		records, err := r.Read()
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(records)
+	records, err := r.ReadAll()
+	for _, record := range records {
+		product := newProduct(record[0], record[1], record[2], record[3], record[4])
+		dbConn := db.Init()
+		dbConn.Create(&product)
 	}
+	return nil
+}
+
+func newProduct(id, name, price, remarks, quantity string) error {
+	_price, _ := strconv.Atoi(price)
+	_quantity, _ := strconv.Atoi(quantity)
+	product := models.Product{
+		ID:          id,
+		ProductName: name,
+		Price:       uint(_price),
+		Remarks:     remarks,
+		Quantity:    _quantity,
+	}
+	log.Println(product)
+	dbConn := db.Init()
+	if err := dbConn.Create(&product).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func main() {
