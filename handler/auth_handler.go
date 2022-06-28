@@ -135,12 +135,14 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 func (h *AuthHandler) Me(ctx *gin.Context) {
 	cookie, err := redis.GetSession(ctx, "jwt")
 	if err != nil {
+		h.logger.Error("failed to get session", zap.Error(err))
 		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "認証に失敗しました"})
 		return
 	}
 
 	id, err := util.ParseJwt(cookie)
 	if err != nil {
+		h.logger.Error("failed to parse cookie", zap.Error(err))
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "unauthorized!",
 		})
@@ -148,6 +150,7 @@ func (h *AuthHandler) Me(ctx *gin.Context) {
 	}
 
 	if id == "" {
+		h.logger.Error("failed to get user", zap.Error(err))
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "unauthorized!",
 		})
@@ -173,7 +176,9 @@ func (h *AuthHandler) Me(ctx *gin.Context) {
 }
 
 func (h *AuthHandler) Logout(ctx *gin.Context) {
-	redis.DeleteSession(ctx, "jwt")
+	if err := redis.DeleteSession(ctx, "jwt"); err != nil {
+		h.logger.Error("failed to delete session", zap.Error(err))
+	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "logout!",
 	})

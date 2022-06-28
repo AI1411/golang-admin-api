@@ -3,8 +3,8 @@ package redis
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"fmt"
 	"io"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v9"
@@ -38,19 +38,22 @@ func GetSession(ctx *gin.Context, cookieKey string) (string, error) {
 	redisValue, err := redisConn.Get(ctx, redisKey).Result()
 	switch {
 	case err == redis.Nil:
-		fmt.Println("SessionKeyが登録されていません。")
-		return "", nil
+		return "", err
 	case err != nil:
-		fmt.Println("Session取得時にエラー発生：" + err.Error())
-		return "", nil
+		return "", err
 	}
 	return redisValue, nil
 }
 
-func DeleteSession(ctx *gin.Context, cookieKey string) {
-	redisKey, _ := ctx.Cookie(cookieKey)
+func DeleteSession(ctx *gin.Context, cookieKey string) error {
+	redisKey, err := ctx.Cookie(cookieKey)
+	log.Printf("redisKey: %s", redisKey)
+	if err != nil {
+		return err
+	}
 	if err := redisConn.Del(ctx, redisKey).Err(); err != nil {
-		panic("Session削除時にエラーが発生：" + err.Error())
+		return err
 	}
 	ctx.SetCookie(cookieKey, "", -1, "/", "localhost", false, false)
+	return nil
 }
