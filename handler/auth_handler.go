@@ -2,7 +2,10 @@ package handler
 
 import (
 	"net/http"
+	"strings"
 	"time"
+
+	"github.com/AI1411/golang-admin-api/db"
 
 	"github.com/AI1411/golang-admin-api/util/appcontext"
 	"github.com/AI1411/golang-admin-api/util/redis"
@@ -133,33 +136,30 @@ func (h *AuthHandler) Login(ctx *gin.Context) {
 }
 
 func (h *AuthHandler) Me(ctx *gin.Context) {
-	cookie, err := redis.GetSession(ctx, "jwt")
-	if err != nil {
-		h.logger.Error("failed to get session", zap.Error(err))
-		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "認証に失敗しました"})
-		return
-	}
+	token := ctx.GetHeader("Authorization")
+	bearerToken := strings.Split(token, " ")[1]
 
-	id, err := util.ParseJwt(cookie)
+	id, err := util.ParseJwt(bearerToken)
 	if err != nil {
-		h.logger.Error("failed to parse cookie", zap.Error(err))
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "unauthorized!",
 		})
+		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
 	if id == "" {
-		h.logger.Error("failed to get user", zap.Error(err))
 		ctx.JSON(http.StatusUnauthorized, gin.H{
 			"message": "unauthorized!",
 		})
+		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
 	var user models.User
+	dbConn := db.Init()
 
-	if err := h.Db.Where("id = ?", id).First(&user).Error; err != nil {
+	if err := dbConn.Where("id = ?", id).First(&user).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
 			ctx.AbortWithStatusJSON(http.StatusNotFound, errors.NewNotFoundError("user not found"))
 			return
@@ -168,10 +168,8 @@ func (h *AuthHandler) Me(ctx *gin.Context) {
 			errors.NewInternalServerError("failed to get user", err))
 		return
 	}
-
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "its me!",
-		"user":    user,
+		"message": "me",
 	})
 }
 

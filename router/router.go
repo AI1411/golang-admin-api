@@ -1,6 +1,8 @@
 package router
 
 import (
+	"log"
+
 	"github.com/AI1411/golang-admin-api/db"
 	"github.com/AI1411/golang-admin-api/handler"
 	"github.com/AI1411/golang-admin-api/middleware"
@@ -8,7 +10,6 @@ import (
 	logger "github.com/AI1411/golang-admin-api/server"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"log"
 )
 
 func Router() *gin.Engine {
@@ -38,15 +39,15 @@ func Router() *gin.Engine {
 	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
 	r.Use(middleware.NewTracing())
 	r.Use(middleware.NewLogging(zapLogger))
+	authorized := r.Group("/")
+	authorized.Use(middleware.AuthenticateBearer())
 	auth := r.Group("/auth")
 	{
 		auth.POST("/login", authHandler.Login)
 		auth.POST("/logout", authHandler.Logout)
 		auth.POST("/register", authHandler.Register)
-		auth.GET("/me", authHandler.Me)
+		authorized.POST("/auth/me", authHandler.Me)
 	}
-	authorized := r.Group("/")
-	authorized.Use(middleware.AuthenticateBearer())
 	todos := authorized.Group("/todos")
 	{
 		todos.GET("", todoHandler.GetAll)
