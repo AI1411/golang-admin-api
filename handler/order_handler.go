@@ -58,11 +58,16 @@ func (h *OrderHandler) GetOrders(ctx *gin.Context) {
 func (h *OrderHandler) GetOrder(ctx *gin.Context) {
 	id := ctx.Param("id")
 	var order models.Order
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Preload("OrderDetails").Where("id = ?", id).First(&order).Error; err != nil {
 		if gorm.IsRecordNotFoundError(err) {
+			h.logger.Error("failed to get order", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.AbortWithStatusJSON(http.StatusNotFound, errors.NewNotFoundError("order not found"))
 			return
 		}
+		h.logger.Error("failed to get order", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.AbortWithStatusJSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to get order", err))
 		return
 	}
@@ -91,6 +96,8 @@ func (h *OrderHandler) CreateOrder(ctx *gin.Context) {
 	}
 	if err := h.Db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Table("orders").Create(&orderData).Error; err != nil {
+			h.logger.Error("failed to create order", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to create order", err))
 			return err
 		}
@@ -99,12 +106,16 @@ func (h *OrderHandler) CreateOrder(ctx *gin.Context) {
 			detail.OrderID = orderData.ID
 			orderData.OrderDetails = append(orderData.OrderDetails, detail)
 			if err := tx.Create(&detail).Error; err != nil {
+				h.logger.Error("failed to create order", zap.Error(err),
+					zap.String("trace_id", traceID))
 				ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to create order detail", err))
 				return err
 			}
 		}
 		return nil
 	}); err != nil {
+		h.logger.Error("failed to create order", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to create order", err))
 		return
 	}
@@ -115,16 +126,20 @@ func (h *OrderHandler) CreateOrder(ctx *gin.Context) {
 func (h *OrderHandler) UpdateOrder(ctx *gin.Context) {
 	order := models.Order{}
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Where("id = ?", id).First(&order).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to update milestone", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("order not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("failed to update milestone", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
 	}
-	traceID := appcontext.GetTraceID(ctx)
 	if err := ctx.ShouldBindJSON(&order); err != nil {
 		res := createValidateErrorResponse(err)
 		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
@@ -132,6 +147,8 @@ func (h *OrderHandler) UpdateOrder(ctx *gin.Context) {
 		return
 	}
 	if err := h.Db.Save(&order).Error; err != nil {
+		h.logger.Error("failed to update milestone", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to update order", err))
 		return
 	}

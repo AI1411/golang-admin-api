@@ -49,6 +49,8 @@ func (h *ProductHandler) GetAllProduct(ctx *gin.Context) {
 	var products []models.Product
 	query := createProductQueryBuilder(params, h)
 	if err := query.Find(&products).Error; err != nil {
+		h.logger.Error("failed to get products", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to get products", err))
 		return
 	}
@@ -61,11 +63,16 @@ func (h *ProductHandler) GetAllProduct(ctx *gin.Context) {
 func (h *ProductHandler) GetProductDetail(ctx *gin.Context) {
 	var product models.Product
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Where("id = ?", id).First(&product).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to get product", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("product not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
@@ -81,7 +88,10 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 		return
 	}
 	product.ID = h.uuidGenerator.GenerateUUID()
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Create(&product).Error; err != nil {
+		h.logger.Error("failed to create product", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to create product", err))
 		return
 	}
@@ -91,16 +101,20 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 func (h *ProductHandler) UpdateProduct(ctx *gin.Context) {
 	product := models.Product{}
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Where("id = ?", id).First(&product).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to update product", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("product not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
 	}
-	traceID := appcontext.GetTraceID(ctx)
 	if err := ctx.ShouldBindJSON(&product); err != nil {
 		res := createValidateErrorResponse(err)
 		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
@@ -108,6 +122,8 @@ func (h *ProductHandler) UpdateProduct(ctx *gin.Context) {
 		return
 	}
 	if err := h.Db.Save(&product).Error; err != nil {
+		h.logger.Error("failed to update product", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to update product", err))
 		return
 	}
@@ -117,16 +133,23 @@ func (h *ProductHandler) UpdateProduct(ctx *gin.Context) {
 func (h *ProductHandler) DeleteProduct(ctx *gin.Context) {
 	product := models.Product{}
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Where("id = ?", id).First(&product).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to delete product", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("product not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
 	}
 	if err := h.Db.Delete(&product).Error; err != nil {
+		h.logger.Error("failed to delete product", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to delete product", err))
 		return
 	}
