@@ -19,6 +19,7 @@ func Cors() gin.HandlerFunc {
 			"GET",
 			"PUT",
 			"OPTIONS",
+			"DELETE",
 		},
 		// 許可したいHTTPリクエストヘッダ
 		AllowHeaders: []string{
