@@ -1,16 +1,14 @@
 package router
 
 import (
-	"log"
-
 	"github.com/AI1411/golang-admin-api/db"
 	"github.com/AI1411/golang-admin-api/handler"
 	"github.com/AI1411/golang-admin-api/middleware"
 	"github.com/AI1411/golang-admin-api/models"
 	logger "github.com/AI1411/golang-admin-api/server"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"log"
 )
 
 func Router() *gin.Engine {
@@ -36,7 +34,7 @@ func Router() *gin.Engine {
 	projectHandler := handler.NewProjectHandler(dbConn, uuidGen, zapLogger)
 
 	r := gin.Default()
-	r.Use(cors.Default())
+	r.Use(middleware.Cors())
 	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
 	r.Use(middleware.NewTracing())
 	r.Use(middleware.NewLogging(zapLogger))
