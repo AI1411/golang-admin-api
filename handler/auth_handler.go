@@ -170,6 +170,7 @@ func (h *AuthHandler) Me(ctx *gin.Context) {
 	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "me",
+		"user":    user,
 	})
 }
 
