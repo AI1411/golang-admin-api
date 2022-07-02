@@ -27,12 +27,17 @@ func NewOrderDetailHandler(db *gorm.DB, logger *zap.Logger) *OrderDetailHandler 
 
 func (h *OrderDetailHandler) GetOrderDetail(ctx *gin.Context) {
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	var orderDetail models.OrderDetail
 	if err := h.Db.Where("id = ?", id).First(&orderDetail).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to get order detail", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("order detail not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
@@ -51,6 +56,8 @@ func (h *OrderDetailHandler) CreateOrderDetail(ctx *gin.Context) {
 	}
 	orderDetail.CreateUUID()
 	if err := h.Db.Create(&orderDetail).Error; err != nil {
+		h.logger.Error("failed to create order detail", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError,
 			errors.NewInternalServerError("failed to create order detail", err))
 		return
@@ -61,16 +68,20 @@ func (h *OrderDetailHandler) CreateOrderDetail(ctx *gin.Context) {
 func (h *OrderDetailHandler) UpdateOrderDetail(ctx *gin.Context) {
 	var orderDetail models.OrderDetail
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Where("id = ?", id).First(&orderDetail).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to update order detail", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("order detail not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
 	}
-	traceID := appcontext.GetTraceID(ctx)
 	if err := ctx.ShouldBindJSON(&orderDetail); err != nil {
 		res := createValidateErrorResponse(err)
 		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
@@ -79,6 +90,8 @@ func (h *OrderDetailHandler) UpdateOrderDetail(ctx *gin.Context) {
 	}
 
 	if err := h.Db.Save(&orderDetail).Error; err != nil {
+		h.logger.Error("failed to update order detail", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError,
 			errors.NewInternalServerError("failed to update order detail", err))
 		return
@@ -90,16 +103,23 @@ func (h *OrderDetailHandler) UpdateOrderDetail(ctx *gin.Context) {
 func (h *OrderDetailHandler) DeleteOrderDetail(ctx *gin.Context) {
 	orderDetail := models.OrderDetail{}
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Where("id = ?", id).First(&orderDetail).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to delete order detail", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("order detail not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
 	}
 	if err := h.Db.Delete(&orderDetail).Error; err != nil {
+		h.logger.Error("failed to delete order detail", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError,
 			errors.NewInternalServerError("failed to delete order detail", err))
 		return
