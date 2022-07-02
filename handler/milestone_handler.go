@@ -43,6 +43,8 @@ func (h *MilestoneHandler) GetMilestones(ctx *gin.Context) {
 	var milestones []models.Milestone
 	query := createMilestoneQueryBuilder(params, h)
 	if err := query.Find(&milestones).Error; err != nil {
+		h.logger.Error("failed to get milestone", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to get milestones", err))
 		return
 	}
@@ -54,12 +56,17 @@ func (h *MilestoneHandler) GetMilestones(ctx *gin.Context) {
 
 func (h *MilestoneHandler) GetMilestoneDetail(ctx *gin.Context) {
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	var milestone models.Milestone
 	if err := h.Db.Where("id = ?", id).First(&milestone).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to find milestone", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("milestone not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
@@ -79,6 +86,8 @@ func (h *MilestoneHandler) CreateMilestone(ctx *gin.Context) {
 	milestone.CreateUUID()
 
 	if err := h.Db.Create(&milestone).Error; err != nil {
+		h.logger.Error("failed to create milestone", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to create milestone", err))
 		return
 	}
@@ -89,16 +98,20 @@ func (h *MilestoneHandler) CreateMilestone(ctx *gin.Context) {
 func (h *MilestoneHandler) UpdateMileStone(ctx *gin.Context) {
 	var milestone models.Milestone
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Where("id = ?", id).First(&milestone).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to update milestone", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("milestone not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
 	}
-	traceID := appcontext.GetTraceID(ctx)
 	if err := ctx.ShouldBindJSON(&milestone); err != nil {
 		res := createValidateErrorResponse(err)
 		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
@@ -107,6 +120,8 @@ func (h *MilestoneHandler) UpdateMileStone(ctx *gin.Context) {
 	}
 
 	if err := h.Db.Save(&milestone).Error; err != nil {
+		h.logger.Error("failed to update milestone", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to update milestone", err))
 		return
 	}
@@ -117,17 +132,24 @@ func (h *MilestoneHandler) UpdateMileStone(ctx *gin.Context) {
 func (h *MilestoneHandler) DeleteMilestone(ctx *gin.Context) {
 	var milestone models.Milestone
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Where("id = ?", id).First(&milestone).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to delete milestone", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("milestone not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
 	}
 
 	if err := h.Db.Delete(&milestone).Error; err != nil {
+		h.logger.Error("failed to delete milestone", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to delete milestone", err))
 		return
 	}
