@@ -68,11 +68,16 @@ func (h *CouponHandler) GetAllCoupon(ctx *gin.Context) {
 func (h *CouponHandler) GetCouponDetail(ctx *gin.Context) {
 	var coupon models.Coupon
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Where("id = ?", id).First(&coupon).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to find coupon", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("coupon not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
@@ -88,8 +93,11 @@ func (h *CouponHandler) CreateCoupon(ctx *gin.Context) {
 		return
 	}
 
+	traceID := appcontext.GetTraceID(ctx)
 	coupon.CreateUUID()
 	if err := h.Db.Create(&coupon).Error; err != nil {
+		h.logger.Error("failed to create coupon", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to create coupon", err))
 		return
 	}
@@ -99,11 +107,16 @@ func (h *CouponHandler) CreateCoupon(ctx *gin.Context) {
 func (h *CouponHandler) UpdateCoupon(ctx *gin.Context) {
 	coupon := models.Coupon{}
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Where("id = ?", id).First(&coupon).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to update coupon", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("coupon not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
@@ -132,10 +145,13 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 		return
 	}
 
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Transaction(func(tx *gorm.DB) error {
 		var coupon models.Coupon
 		if err := h.Db.First(&coupon, "id = ?", couponID).Error; err != nil {
 			if gorm.IsRecordNotFoundError(err) {
+				h.logger.Error("failed to acquire coupon", zap.Error(err),
+					zap.String("trace_id", traceID))
 				ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("coupon not found"))
 				return err
 			}
@@ -144,6 +160,8 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 		var user models.User
 		if err := h.Db.First(&user, "id = ?", userID).Error; err != nil {
 			if gorm.IsRecordNotFoundError(err) {
+				h.logger.Error("failed to find user", zap.Error(err),
+					zap.String("trace_id", traceID))
 				ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("user not found"))
 				return err
 			}
@@ -156,12 +174,16 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 		}
 
 		if err := h.Db.Table("coupon_user").Create(&couponUser).Error; err != nil {
+			h.logger.Error("failed to acquire coupon", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusInternalServerError,
 				errors.NewInternalServerError("failed to acquire coupon", err))
 			return err
 		}
 		return nil
 	}); err != nil {
+		h.logger.Error("failed to acquire coupon", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to acquire coupon", err))
 		return
 	}

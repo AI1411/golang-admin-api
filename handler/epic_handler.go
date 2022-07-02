@@ -48,6 +48,8 @@ func (h *EpicHandler) GetEpics(ctx *gin.Context) {
 	var epics []models.Epic
 	query := createEpicQueryBuilder(params, h)
 	if err := query.Find(&epics).Error; err != nil {
+		h.logger.Error("failed to get epics", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to get epics", err))
 		return
 	}
@@ -59,12 +61,17 @@ func (h *EpicHandler) GetEpics(ctx *gin.Context) {
 
 func (h *EpicHandler) GetEpicDetail(ctx *gin.Context) {
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	var epic models.Epic
 	if err := h.Db.Where("id = ?", id).First(&epic).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to find coupon", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("epic not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
@@ -82,6 +89,8 @@ func (h *EpicHandler) CreateEpic(ctx *gin.Context) {
 		return
 	}
 	if err := h.Db.Create(&epic).Error; err != nil {
+		h.logger.Error("failed to create coupon", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to create epic", err))
 		return
 	}
@@ -91,16 +100,20 @@ func (h *EpicHandler) CreateEpic(ctx *gin.Context) {
 func (h *EpicHandler) UpdateEpic(ctx *gin.Context) {
 	var epic models.Epic
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Where("id = ?", id).First(&epic).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to update epic", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("epic not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
 	}
-	traceID := appcontext.GetTraceID(ctx)
 	if err := ctx.ShouldBindJSON(&epic); err != nil {
 		res := createValidateErrorResponse(err)
 		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
@@ -109,6 +122,8 @@ func (h *EpicHandler) UpdateEpic(ctx *gin.Context) {
 	}
 
 	if err := h.Db.Save(&epic).Error; err != nil {
+		h.logger.Error("failed to update epic", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to update epic", err))
 		return
 	}
@@ -119,17 +134,24 @@ func (h *EpicHandler) UpdateEpic(ctx *gin.Context) {
 func (h *EpicHandler) DeleteEpic(ctx *gin.Context) {
 	var epic models.Epic
 	id := ctx.Param("id")
+	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Where("id = ?", id).First(&epic).Error; err != nil {
 		switch err {
 		case gorm.ErrRecordNotFound:
+			h.logger.Error("failed to delete epic", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("epic not found"))
 		case gorm.ErrInvalidSQL:
+			h.logger.Error("invalid sql", zap.Error(err),
+				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid sql"))
 		}
 		return
 	}
 
 	if err := h.Db.Delete(&epic).Error; err != nil {
+		h.logger.Error("failed to delete epic", zap.Error(err),
+			zap.String("trace_id", traceID))
 		ctx.JSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to delete epic", err))
 		return
 	}
