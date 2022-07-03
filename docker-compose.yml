@@ -7,3 +7,14 @@ services:
       - "6379:6379"
     volumes:
       - ./data/redis-data:/data
+
+  redoc:
+    platform: linux/amd64
+    image: redocly/redoc:latest
+    container_name: redoc
+    ports:
+      - "8081:80"
+    volumes:
+      - ./docs/:/usr/share/nginx/html/swagger/
+    environment:
+      - SPEC_URL=swagger/swagger.yaml
