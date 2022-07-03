@@ -30,6 +30,9 @@ jobs:
       - name: Install Dependencies
         run: docker-compose up -d
 
+      - name: module install
+        run: go install github.com/swaggo/swag/cmd/swag@latest
+
       - name: Build Docs
         run: swag init
 
