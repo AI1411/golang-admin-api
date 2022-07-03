@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 	"github.com/jinzhu/gorm"
 
 	"github.com/AI1411/golang-admin-api/models"
@@ -36,14 +37,30 @@ type searchTodoPrams struct {
 	Limit     string `form:"limit" binding:"omitempty,numeric"`
 }
 
+type todoRequest struct {
+	Title  string `json:"title"`
+	Body   string `json:"body"`
+	Status string `json:"status"`
+	UserId string `json:"user_id"`
+}
+
+type todoItem struct {
+	models.Todo
+}
+
+type todosResponse struct {
+	Total int        `json:"total" example:"1"`
+	Todos []todoItem `json:"todos"`
+}
+
 // GetAll @title 一覧取得
 // @id GetAll
-// @tags golang-admin-api
+// @tags todos
 // @version バージョン(1.0)
 // @description 指定された条件に一致するtodo一覧情報を取得する
 // @Summary todo一覧取得
 // @Produce json
-// @Success 200 {object} models.Todo
+// @Success 200 {object} todosResponse
 // @Failure 400 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Router /todos [GET]
@@ -66,12 +83,33 @@ func (h *TodoHandler) GetAll(ctx *gin.Context) {
 	var todos []models.Todo
 	query := createBaseQueryBuilder(params, h)
 	query.Find(&todos)
-	ctx.JSON(http.StatusOK, gin.H{
-		"total": len(todos),
-		"todos": todos,
-	})
+
+	res := todosResponse{
+		Total: len(todos),
+		Todos: []todoItem{},
+	}
+	res.Total = len(todos)
+	if err := copier.Copy(&res.Todos, &todos); err != nil {
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, res)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, res)
 }
 
+// GetDetail @title todo詳細
+// @id GetDetail
+// @tags todos
+// @version バージョン(1.0)
+// @description todo詳細を返す
+// @Summary todo詳細取得
+// @Produce json
+// @Success 200 {object} models.Todo
+// @Failure 400 {object} errorResponse
+// @Failure 404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /todos/:id [GET]
+// @Param id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h *TodoHandler) GetDetail(ctx *gin.Context) {
 	var todo models.Todo
 	id := ctx.Param("id")
@@ -88,6 +126,19 @@ func (h *TodoHandler) GetDetail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, todo)
 }
 
+// CreateTodo @title todo作成
+// @id CreateTodo
+// @tags todos
+// @version バージョン(1.0)
+// @description todoを作成する
+// @Summary todo作成
+// @Produce json
+// @Success 201 {object} todoItem
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /todos [POST]
+// @Accept json
+// @Param todoRequest body todoRequest true "create todo"
 func (h *TodoHandler) CreateTodo(ctx *gin.Context) {
 	todo := models.Todo{}
 	if err := ctx.ShouldBindJSON(&todo); err != nil {
@@ -99,6 +150,20 @@ func (h *TodoHandler) CreateTodo(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, todo)
 }
 
+// UpdateTodo @title todo編集
+// @id UpdateTodo
+// @tags todos
+// @version バージョン(1.0)
+// @description todoを編集する
+// @Summary todo編集
+// @Produce json
+// @Success 201 {object} todoItem
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /todos/:id [PUT]
+// @Accept json
+// @Param todoRequest body todoRequest true "update todo"
+// @Param id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h *TodoHandler) UpdateTodo(ctx *gin.Context) {
 	todo := models.Todo{}
 	id := ctx.Param("id")
@@ -112,6 +177,19 @@ func (h *TodoHandler) UpdateTodo(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, todo)
 }
 
+// DeleteTodo @title tod削除
+// @id DeleteTodo
+// @tags todos
+// @version バージョン(1.0)
+// @description todoを削除する
+// @Summary todo編集
+// @Produce json
+// @Success 204
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /todos/:id [DELETE]
+// @Accept json
+// @Param id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h TodoHandler) DeleteTodo(ctx *gin.Context) {
 	todo := models.Todo{}
 	id := ctx.Param("id")

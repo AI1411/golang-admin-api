@@ -10,11 +10,10 @@ require (
 	github.com/go-redis/redis/v9 v9.0.0-beta.1
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
+	github.com/jinzhu/copier v0.3.5
 	github.com/jinzhu/gorm v1.9.16
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/stretchr/testify v1.7.2
-	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
-	github.com/swaggo/gin-swagger v1.5.0
 	github.com/swaggo/swag v1.8.3
 	github.com/urfave/cli/v2 v2.10.3
 	go.uber.org/zap v1.21.0
