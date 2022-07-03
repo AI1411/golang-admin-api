@@ -1,8 +1,7 @@
-.PHONY: lint
+.PHONY: lint fmt test rtest migrate swag
 lint:
 	golangci-lint run
 
-.PHONY: fmt
 fmt:
 	go fmt ./...
 	gofumpt -l -w .
@@ -15,3 +14,6 @@ rtest:
 
 migrate:
 	migrate -source file://db/migrations -database 'mysql://root:root@tcp(127.0.0.1:3306)/go' up
+
+swag:
+	swag init
