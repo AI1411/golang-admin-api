@@ -1,22 +1,54 @@
-name: github pages
-
+name: Deploy API Documents
 on:
   push:
-    branches: [ main ]
-
-  workflow_dispatch:
+    branches:
+      - main
 
 jobs:
-  deploy:
+  api-documents:
     runs-on: ubuntu-latest
-
+    env:
+      IMAGE_CACHE_DIR: /tmp/cache/docker-image
+      APP_IMAGE_TAG: gaa:0.0.1
+      APP_IMAGE_CACHE_TAG: golang-admin-api
     steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: main
+      - name: Checkout
+        uses: actions/checkout@master
 
-      - name: pages deploy
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Cache Docker Image
+        id: cache-docker-image
+        uses: actions/cache@v2
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs
+          path: ${{ env.IMAGE_CACHE_DIR }}
+          key: ${{ runner.os }}-${{ env.APP_IMAGE_TAG }}-${{ hashFiles('Dockerfile') }}
+
+      - name: Load Docker Cache
+        id: load-docker-cache
+        if: steps.cache-docker-image.outputs.cache-hit == 'true'
+        run: docker image load -i "${IMAGE_CACHE_DIR}/image.tar"
+
+      - name: Install Dependencies
+        run: docker-compose up -d
+
+      - name: Build Docs
+        run: swag init
+
+      - name: Deploy Docs
+        run: |
+          mv docs/swagger.yaml redoc/swagger.yaml
+          git remote set-url origin "https://github-actions:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}"
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git add redoc/swagger.yaml
+          if ! git diff --cached --quiet; then
+            git commit -m "Deploy Redoc from GitHub Actions"
+            git push origin HEAD:"${GITHUB_REF}"
+          fi
+
+      - name: Save Docker Image To Cache
+        id: save-docker-image-to-cache
+        if: steps.cache-docker-image.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p "${IMAGE_CACHE_DIR}"
+          docker image tag "${APP_IMAGE_TAG}" "${APP_IMAGE_CACHE_TAG}"
+          docker image save -o "${IMAGE_CACHE_DIR}/image.tar" "${APP_IMAGE_CACHE_TAG}"
