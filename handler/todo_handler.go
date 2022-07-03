@@ -38,10 +38,10 @@ type searchTodoPrams struct {
 }
 
 type todoRequest struct {
-	Title  string `json:"title"`
-	Body   string `json:"body"`
-	Status string `json:"status"`
-	UserId string `json:"user_id"`
+	Title  string `json:"title" binding:"required,max=64" format:"" example:"test"`
+	Body   string `json:"body" binding:"required,max=64" example:"test body"`
+	Status string `json:"status" binding:"required,oneof=new processing done closed" example:"new"`
+	UserId string `json:"user_id" binding:"required,uuid4" format:"/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i" example:"443b5f1c-8a3a-4485-b3bc-05e69b40b290"`
 }
 
 type todoItem struct {
@@ -104,7 +104,7 @@ func (h *TodoHandler) GetAll(ctx *gin.Context) {
 // @description todo詳細を返す
 // @Summary todo詳細取得
 // @Produce json
-// @Success 200 {object} models.Todo
+// @Success 200 {object} todoItem
 // @Failure 400 {object} errorResponse
 // @Failure 404 {object} errorResponse
 // @Failure 500 {object} errorResponse
@@ -157,7 +157,7 @@ func (h *TodoHandler) CreateTodo(ctx *gin.Context) {
 // @description todoを編集する
 // @Summary todo編集
 // @Produce json
-// @Success 201 {object} todoItem
+// @Success 202 {object} todoItem
 // @Failure 400 {object} errorResponse
 // @Failure 500 {object} errorResponse
 // @Router /todos/:id [PUT]
@@ -177,12 +177,12 @@ func (h *TodoHandler) UpdateTodo(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, todo)
 }
 
-// DeleteTodo @title tod削除
+// DeleteTodo @title todo削除
 // @id DeleteTodo
 // @tags todos
 // @version バージョン(1.0)
 // @description todoを削除する
-// @Summary todo編集
+// @Summary todo削除
 // @Produce json
 // @Success 204
 // @Failure 400 {object} errorResponse

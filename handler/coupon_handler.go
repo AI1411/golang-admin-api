@@ -1,7 +1,9 @@
 package handler
 
 import (
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/AI1411/golang-admin-api/util/appcontext"
 	"go.uber.org/zap"
@@ -25,6 +27,29 @@ func NewCouponHandler(db *gorm.DB, logger *zap.Logger) *CouponHandler {
 	}
 }
 
+type couponRequest struct {
+	Title             string    `json:"title" binding:"required" example:"クーポンタイトル"`
+	Remarks           string    `json:"remarks" binding:"omitempty,max=255" example:"クーポン備考"`
+	DiscountAmount    uint64    `json:"discount_amount" binding:"omitempty,min=1" example:"1000"`
+	DiscountRate      uint8     `json:"discount_rate" binding:"omitempty,min=1,max=100" example:"10"`
+	MaxDiscountAmount uint64    `json:"max_discount_amount" binding:"omitempty,min=1" example:"1000"`
+	UseStartAt        time.Time `json:"use_start_at" binding:"required" example:"2020-01-01T00:00:00+09:00"`
+	UseEndAt          time.Time `json:"use_end_at" binding:"required" example:"2020-01-01T00:00:00+09:00"`
+	PublicStartAt     time.Time `json:"public_start_at" binding:"required" example:"2020-01-01T00:00:00+09:00"`
+	PublicEndAt       time.Time `json:"public_end_at" binding:"required" example:"2020-01-01T00:00:00+09:00"`
+	IsPublic          bool      `json:"is_public" example:"true"`
+	IsPremium         bool      `json:"is_premium" example:"true"`
+}
+
+type couponResponseItem struct {
+	models.Coupon
+}
+
+type couponResponse struct {
+	Coupons []couponResponseItem `json:"coupons"`
+	Total   int                  `json:"total"`
+}
+
 type searchCouponParams struct {
 	Title             string `form:"title" binding:"omitempty,max=64"`
 	DiscountAmount    string `form:"discount_amount" binding:"omitempty,numeric"`
@@ -44,6 +69,33 @@ type searchCouponParams struct {
 	Limit             string `form:"limit,default=10" binding:"omitempty,numeric"`
 }
 
+// GetAllCoupon @title 一覧取得
+// @id GetAllCoupon
+// @tags coupons
+// @version バージョン(1.0)
+// @description 指定された条件に一致するcoupon一覧情報を取得する
+// @Summary coupon一覧取得
+// @Produce json
+// @Success 200 {object} couponResponse
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /coupons [GET]
+// @Param title query string false "タイトル" format(YYYY-MM-DDThh:mm:ss±hh:mm)
+// @Param discount_amount query int false "値引額" minimum(0)
+// @Param discount_rate query int false "割引率" minimum(0)
+// @Param max_discount_amount query int false "最大値引額" minimum(0)
+// @Param use_start_at_from query string false "利用開始日" format(YYYY-MM-DDThh:mm:ss±hh:mm)
+// @Param use_start_at_to query string false "利用開始日" format(YYYY-MM-DDThh:mm:ss±hh:mm)
+// @Param use_end_at_from query string false "利用終了日" format(YYYY-MM-DDThh:mm:ss±hh:mm)
+// @Param use_end_at_to query string false "利用終了日" format(YYYY-MM-DDThh:mm:ss±hh:mm)
+// @Param public_start_at_from query string false "公開開始日" format(YYYY-MM-DDThh:mm:ss±hh:mm)
+// @Param public_start_at_to query string false "公開開始日" format(YYYY-MM-DDThh:mm:ss±hh:mm)
+// @Param public_end_at_from query string false "公開終了日" format(YYYY-MM-DDThh:mm:ss±hh:mm)
+// @Param public_end_at_to query string false "公開終了日" format(YYYY-MM-DDThh:mm:ss±hh:mm)
+// @Param is_public query string false "公開フラグ"
+// @Param is_premium query string false "プレミアムフラグ"
+// @Param offset query int false "開始位置" default(0) minimum(0)
+// @Param limit query int false "取得上限" default(12) minimum(1) maximum(100)
 func (h *CouponHandler) GetAllCoupon(ctx *gin.Context) {
 	traceID := appcontext.GetTraceID(ctx)
 	var params searchCouponParams
@@ -65,6 +117,19 @@ func (h *CouponHandler) GetAllCoupon(ctx *gin.Context) {
 	})
 }
 
+// GetCouponDetail @title coupon詳細
+// @id GetCouponDetail
+// @tags coupons
+// @version バージョン(1.0)
+// @description coupon詳細を返す
+// @Summary coupon詳細取得
+// @Produce json
+// @Success 200 {object} couponResponseItem
+// @Failure 400 {object} errorResponse
+// @Failure 404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /coupons/:id [GET]
+// @Param id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h *CouponHandler) GetCouponDetail(ctx *gin.Context) {
 	var coupon models.Coupon
 	id := ctx.Param("id")
@@ -85,6 +150,19 @@ func (h *CouponHandler) GetCouponDetail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, coupon)
 }
 
+// CreateCoupon @title coupon作成
+// @id CreateCoupon
+// @tags coupons
+// @version バージョン(1.0)
+// @description couponを作成する
+// @Summary coupon作成
+// @Produce json
+// @Success 201 {object} couponResponseItem
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /coupons [POST]
+// @Accept json
+// @Param couponRequest body couponRequest true "create coupon"
 func (h *CouponHandler) CreateCoupon(ctx *gin.Context) {
 	coupon := models.Coupon{}
 	if err := ctx.ShouldBindJSON(&coupon); err != nil {
@@ -104,6 +182,20 @@ func (h *CouponHandler) CreateCoupon(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, coupon)
 }
 
+// UpdateCoupon @title coupon編集
+// @id UpdateCoupon
+// @tags coupons
+// @version バージョン(1.0)
+// @description couponを編集する
+// @Summary coupon編集
+// @Produce json
+// @Success 202 {object} couponResponseItem
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /coupons/:id [PUT]
+// @Accept json
+// @Param couponRequest body couponRequest true "update coupon"
+// @Param id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h *CouponHandler) UpdateCoupon(ctx *gin.Context) {
 	coupon := models.Coupon{}
 	id := ctx.Param("id")
@@ -133,13 +225,29 @@ func (h *CouponHandler) UpdateCoupon(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, coupon)
 }
 
+// AcquireCoupon @title coupon獲得
+// @id AcquireCoupon
+// @tags coupons
+// @version バージョン(1.0)
+// @description couponを獲得する
+// @Summary coupon獲得
+// @Produce json
+// @Success 201
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /:coupon_id/users/:user_id [POST]
+// @Accept json
+// @Param coupon_id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
+// @Param user_id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 	var couponUser models.CouponUser
 	couponID := ctx.Param("coupon_id")
 	userID := ctx.Param("user_id")
 	couponUser.CouponID = couponID
 	couponUser.UserID = userID
+	log.Printf("couponID: %s, userID: %s, couponUser: %+v", couponID, userID, couponUser)
 	if err := ctx.ShouldBindJSON(&couponUser); err != nil {
+		log.Printf("err=%v", err)
 		res := createValidateErrorResponse(err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
@@ -170,6 +278,8 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 		if err := h.Db.Table("coupon_user").
 			Where("coupon_id = ? and user_id = ?", couponID, userID).
 			First(&couponUser).Error; err != nil {
+			h.logger.Error("failed to find coupon user", zap.Error(err),
+				zap.String("trace_id", traceID))
 			return err
 		}
 
@@ -188,7 +298,7 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, couponUser)
+	ctx.Status(http.StatusCreated)
 }
 
 func createCouponQueryBuilder(params searchCouponParams, h *CouponHandler) *gorm.DB {
