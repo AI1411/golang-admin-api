@@ -1,6 +1,9 @@
 package router
 
 import (
+	"github.com/AI1411/golang-admin-api/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 
 	"github.com/AI1411/golang-admin-api/db"
@@ -35,6 +38,10 @@ func Router() *gin.Engine {
 	projectHandler := handler.NewProjectHandler(dbConn, uuidGen, zapLogger)
 
 	r := gin.Default()
+
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	r.Use(middleware.Cors())
 	r.Use(func(_ *gin.Context) { binding.EnableDecoderUseNumber = true })
 	r.Use(middleware.NewTracing())
