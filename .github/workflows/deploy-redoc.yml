@@ -15,16 +15,6 @@ jobs:
         with:
           ref: main
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: bundle
-        run: npm run bundle
-
       - name: pages deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
