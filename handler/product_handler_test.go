@@ -99,10 +99,6 @@ var getProductsTestCases = []struct {
 					"message": "PriceToは不正です"
 				},
 				{
-					"attribute": "Remarks",
-					"message": "備考は不正です"
-				},
-				{
 					"attribute": "Offset",
 					"message": "Offsetは不正です"
 				},
@@ -175,26 +171,6 @@ var getProductsTestCases = []struct {
 	},
 	{
 		tid:  7,
-		name: "remarks で検索",
-		request: map[string]interface{}{
-			"remarks": "1",
-		},
-		wantStatus: http.StatusOK,
-		wantBody: `{
-			"products": [
-				{
-					"id": "090e142d-baa3-4039-9d21-cf5a1af39094",
-					"product_name": "1",
-					"price": 100,
-					"remarks": "1",
-					"quantity": 1
-				}
-			],
-			"total": 1
-		}`,
-	},
-	{
-		tid:  8,
 		name: "quantity で検索",
 		request: map[string]interface{}{
 			"quantity": 1,
