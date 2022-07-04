@@ -31,12 +31,46 @@ type searchProductParams struct {
 	ProductName string `form:"product_name" binding:"max=64"`
 	PriceFrom   string `form:"price_from" binding:"omitempty,numeric"`
 	PriceTo     string `form:"price_to" binding:"omitempty,numeric"`
-	Remarks     string `form:"remarks" binding:"omitempty,max=255"`
 	Quantity    string `form:"quantity" binding:"omitempty,numeric,min=1"`
 	Offset      string `form:"offset,default=0" binding:"omitempty,numeric"`
 	Limit       string `form:"limit,default=10" binding:"omitempty,numeric"`
 }
 
+type productRequest struct {
+	ProductName string `json:"product_name" example:"product name" binding:"required,max=64"`
+	Remarks     string `json:"remarks" example:"remarks" binding:"omitempty,max=255"`
+}
+
+type productResponseItem struct {
+	Id          string `json:"id" example:"218c51c0-904e-4743-a2ae-94f0e34a0d6f"`
+	ProductName string `json:"product_name" example:"product name"`
+	Price       int    `json:"price" example:"100"`
+	Remarks     string `json:"remarks" example:"remarks"`
+	Quantity    int    `json:"quantity" example:"1"`
+}
+
+type productsResponse struct {
+	Total    int                   `json:"total"`
+	Products []productResponseItem `json:"products"`
+}
+
+// GetAllProduct @title 一覧取得
+// @id GetAllProduct
+// @tags products
+// @version バージョン(1.0)
+// @description 指定された条件に一致するproduct一覧情報を取得する
+// @Summary product一覧取得
+// @Produce json
+// @Success 200 {object} productsResponse
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /products [GET]
+// @Param product_name query string false "商品名" maxlength(64)
+// @Param price_from query int false "金額from" minimum(0)
+// @Param price_to query int false "金額to" minimum(0)
+// @Param quantity query int false "数量" minimum(1)
+// @Param offset query int false "開始位置" default(0) minimum(0)
+// @Param limit query int false "取得上限" default(12) minimum(1) maximum(100)
 func (h *ProductHandler) GetAllProduct(ctx *gin.Context) {
 	traceID := appcontext.GetTraceID(ctx)
 	var params searchProductParams
@@ -60,6 +94,19 @@ func (h *ProductHandler) GetAllProduct(ctx *gin.Context) {
 	})
 }
 
+// GetProductDetail @title product詳細
+// @id GetProductDetail
+// @tags products
+// @version バージョン(1.0)
+// @description product詳細を返す
+// @Summary product詳細取得
+// @Produce json
+// @Success 200 {object} productResponseItem
+// @Failure 400 {object} errorResponse
+// @Failure 404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /products/:id [GET]
+// @Param id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h *ProductHandler) GetProductDetail(ctx *gin.Context) {
 	var product models.Product
 	id := ctx.Param("id")
@@ -80,6 +127,19 @@ func (h *ProductHandler) GetProductDetail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, product)
 }
 
+// CreateProduct @title product作成
+// @id CreateProduct
+// @tags products
+// @version バージョン(1.0)
+// @description productを作成する
+// @Summary product作成
+// @Produce json
+// @Success 201 {object} productResponseItem
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /products [POST]
+// @Accept json
+// @Param productRequest body productRequest true "create product"
 func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 	product := models.Product{}
 	if err := ctx.ShouldBindJSON(&product); err != nil {
@@ -98,6 +158,20 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, product)
 }
 
+// UpdateProduct @title product編集
+// @id UpdateProduct
+// @tags products
+// @version バージョン(1.0)
+// @description productを編集する
+// @Summary product編集
+// @Produce json
+// @Success 202 {object} productResponseItem
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /products/:id [PUT]
+// @Accept json
+// @Param productRequest body productRequest true "update product"
+// @Param id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h *ProductHandler) UpdateProduct(ctx *gin.Context) {
 	product := models.Product{}
 	id := ctx.Param("id")
@@ -130,6 +204,19 @@ func (h *ProductHandler) UpdateProduct(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, product)
 }
 
+// DeleteProduct @title product削除
+// @id DeleteProduct
+// @tags products
+// @version バージョン(1.0)
+// @description productを削除する
+// @Summary product削除
+// @Produce json
+// @Success 204
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /products/:id [DELETE]
+// @Accept json
+// @Param id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h *ProductHandler) DeleteProduct(ctx *gin.Context) {
 	product := models.Product{}
 	id := ctx.Param("id")
@@ -167,9 +254,6 @@ func createProductQueryBuilder(params searchProductParams, h *ProductHandler) *g
 	}
 	if params.PriceTo != "" {
 		query = query.Where("price < ?", params.PriceTo)
-	}
-	if params.Remarks != "" {
-		query = query.Where("remarks LIKE ?", "%"+params.Remarks+"%")
 	}
 	if params.Quantity != "" {
 		query = query.Where("quantity = ?", params.Quantity)
