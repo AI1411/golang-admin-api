@@ -25,6 +25,34 @@ func NewOrderDetailHandler(db *gorm.DB, logger *zap.Logger) *OrderDetailHandler 
 	}
 }
 
+type orderDetailRequest struct {
+	OrderId   string `json:"order_id" binding:"required,uuid4" format:"/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i" example:"e6f8b0c0-c8b7-4c8e-a098-e1c8b9e1c9c9"`
+	ProductId string `json:"product_id" binding:"required,uuid4" format:"/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i" example:"e6f8b0c0-c8b7-4c8e-a098-e1c8b9e1c9c9"`
+	Quantity  int    `json:"quantity" binding:"required,min=1" example:"1"`
+	Price     int    `json:"price" binding:"required,min=1" example:"1"`
+}
+
+type orderDetailResponseItem struct {
+	Id                string `json:"id" example:"e6f8b0c0-c8b7-4c8e-a098-e1c8b9e1c9c9"`
+	OrderId           string `json:"order_id" example:"e6f8b0c0-c8b7-4c8e-a098-e1c8b9e1c9c9"`
+	ProductId         string `json:"product_id" example:"e6f8b0c0-c8b7-4c8e-a098-e1c8b9e1c9c9"`
+	Quantity          int    `json:"quantity" example:"1"`
+	OrderDetailStatus string `json:"order_detail_status" example:"new"`
+	Price             int    `json:"price" example:"1"`
+}
+
+// GetOrderDetail @title 注文明細詳細取得
+// @id GetOrderDetail
+// @tags orderDetails
+// @version バージョン(1.0)
+// @description 指定された条件に一致するorderDetail詳細情報を取得する
+// @Summary orderDetail詳細取得
+// @Produce json
+// @Success 200 {object} orderDetailResponseItem
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /orderDetails [GET]
+// @Param id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h *OrderDetailHandler) GetOrderDetail(ctx *gin.Context) {
 	id := ctx.Param("id")
 	traceID := appcontext.GetTraceID(ctx)
@@ -45,6 +73,19 @@ func (h *OrderDetailHandler) GetOrderDetail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, orderDetail)
 }
 
+// CreateOrderDetail @title orderDetail作成
+// @id CreateOrderDetail
+// @tags orderDetails
+// @version バージョン(1.0)
+// @description orderDetailを作成する
+// @Summary orderDetail作成
+// @Produce json
+// @Success 201 {object} orderDetailResponseItem
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /orderDetails [POST]
+// @Accept json
+// @Param orderDetailRequest body orderDetailRequest true "create orderDetail"
 func (h *OrderDetailHandler) CreateOrderDetail(ctx *gin.Context) {
 	traceID := appcontext.GetTraceID(ctx)
 	orderDetail := models.OrderDetail{}
@@ -65,6 +106,20 @@ func (h *OrderDetailHandler) CreateOrderDetail(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, orderDetail)
 }
 
+// UpdateOrderDetail @title orderDetail編集
+// @id UpdateOrderDetail
+// @tags orderDetails
+// @version バージョン(1.0)
+// @description orderDetailを編集する
+// @Summary orderDetail編集
+// @Produce json
+// @Success 202 {object} orderDetailResponseItem
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /orderDetails/:id [PUT]
+// @Accept json
+// @Param orderDetailRequest body orderDetailRequest true "update orderDetail"
+// @Param id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h *OrderDetailHandler) UpdateOrderDetail(ctx *gin.Context) {
 	var orderDetail models.OrderDetail
 	id := ctx.Param("id")
@@ -100,6 +155,19 @@ func (h *OrderDetailHandler) UpdateOrderDetail(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, orderDetail)
 }
 
+// DeleteOrderDetail @title orderDetail削除
+// @id DeleteOrderDetail
+// @tags orderDetails
+// @version バージョン(1.0)
+// @description orderDetailを削除する
+// @Summary orderDetail削除
+// @Produce json
+// @Success 204
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /orderDetails/:id [DELETE]
+// @Accept json
+// @Param id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h *OrderDetailHandler) DeleteOrderDetail(ctx *gin.Context) {
 	orderDetail := models.OrderDetail{}
 	id := ctx.Param("id")
