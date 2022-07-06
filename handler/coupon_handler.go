@@ -41,6 +41,11 @@ type couponRequest struct {
 	IsPremium         bool      `json:"is_premium" example:"true"`
 }
 
+type acquireCouponRequest struct {
+	UserID   string `json:"user_id" binding:"required,uuid4" example:"443b5f1c-8a3a-4485-b3bc-05e69b40b290" format:"/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i"`
+	CouponID string `json:"coupon_id" binding:"required,uuid4" example:"443b5f1c-8a3a-4485-b3bc-05e69b40b290" format:"/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i"`
+}
+
 type couponResponseItem struct {
 	models.Coupon
 }
@@ -240,13 +245,8 @@ func (h *CouponHandler) UpdateCoupon(ctx *gin.Context) {
 // @Param coupon_id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 // @Param user_id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
 func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
-	var couponUser models.CouponUser
-	couponID := ctx.Param("coupon_id")
-	userID := ctx.Param("user_id")
-	couponUser.CouponID = couponID
-	couponUser.UserID = userID
-	log.Printf("couponID: %s, userID: %s, couponUser: %+v", couponID, userID, couponUser)
-	if err := ctx.ShouldBindJSON(&couponUser); err != nil {
+	var req acquireCouponRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		log.Printf("err=%v", err)
 		res := createValidateErrorResponse(err)
 		ctx.AbortWithStatusJSON(res.Code, res)
@@ -256,7 +256,7 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 	traceID := appcontext.GetTraceID(ctx)
 	if err := h.Db.Transaction(func(tx *gorm.DB) error {
 		var coupon models.Coupon
-		if err := h.Db.First(&coupon, "id = ?", couponID).Error; err != nil {
+		if err := h.Db.First(&coupon, "id = ?", req.CouponID).Error; err != nil {
 			if gorm.IsRecordNotFoundError(err) {
 				h.logger.Error("failed to acquire coupon", zap.Error(err),
 					zap.String("trace_id", traceID))
@@ -266,7 +266,7 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 		}
 
 		var user models.User
-		if err := h.Db.First(&user, "id = ?", userID).Error; err != nil {
+		if err := h.Db.First(&user, "id = ?", req.UserID).Error; err != nil {
 			if gorm.IsRecordNotFoundError(err) {
 				h.logger.Error("failed to find user", zap.Error(err),
 					zap.String("trace_id", traceID))
@@ -275,15 +275,28 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 			}
 		}
 
+		var couponUser models.CouponUser
 		if err := h.Db.Table("coupon_user").
-			Where("coupon_id = ? and user_id = ?", couponID, userID).
-			First(&couponUser).Error; err != nil {
+			First(&couponUser, "coupon_id = ? and user_id = ?", req.CouponID, req.UserID).
+			Error; err != nil {
 			h.logger.Error("failed to find coupon user", zap.Error(err),
 				zap.String("trace_id", traceID))
 			return err
 		}
 
-		if err := h.Db.Table("coupon_user").Create(&couponUser).Error; err != nil {
+		if couponUser.ID != 0 {
+			h.logger.Error("coupon already acquired", zap.Error(nil),
+				zap.String("trace_id", traceID))
+			ctx.JSON(http.StatusBadRequest,
+				errors.NewBadRequestError("failed to acquire coupon"))
+			return nil
+		}
+
+		if err := h.Db.Table("coupon_user").Create(&models.CouponUser{
+			CouponID: req.CouponID,
+			UserID:   req.UserID,
+			UseCount: 0,
+		}).Error; err != nil {
 			h.logger.Error("failed to acquire coupon", zap.Error(err),
 				zap.String("trace_id", traceID))
 			ctx.JSON(http.StatusInternalServerError,
