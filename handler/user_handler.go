@@ -29,7 +29,7 @@ type searchUserParams struct {
 	Age       string `form:"age" binding:"omitempty,numeric"`
 	Email     string `form:"email" binding:"omitempty,max=64"`
 	Offset    string `form:"offset,default=0" binding:"omitempty,numeric"`
-	Limit     string `form:"limit,default=10" binding:"omitempty,numeric"`
+	Limit     string `form:"limit,default=5" binding:"omitempty,numeric"`
 }
 
 func NewUserHandler(db *gorm.DB, logger *zap.Logger) *UserHandler {
