@@ -95,6 +95,7 @@ func Router() *gin.Engine {
 		coupons.POST("", couponHandler.CreateCoupon)
 		coupons.PUT("/:id", couponHandler.UpdateCoupon)
 		coupons.POST("/acquire", couponHandler.AcquireCoupon)
+		coupons.POST("/discounted", couponHandler.DiscountedList)
 	}
 	userGroups := authorized.Group("/userGroups")
 	{

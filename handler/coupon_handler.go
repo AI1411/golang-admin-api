@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 	"time"
 
@@ -46,6 +45,12 @@ type acquireCouponRequest struct {
 	CouponID string `json:"coupon_id" binding:"required,uuid4" example:"443b5f1c-8a3a-4485-b3bc-05e69b40b290" format:"/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i"`
 }
 
+type couponDiscountRequest struct {
+	CouponID   string   `json:"coupon_id" binding:"required,uuid4" example:"443b5f1c-8a3a-4485-b3bc-05e69b40b290" format:"/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i"`
+	UserID     string   `json:"user_id" binding:"required,uuid4" example:"443b5f1c-8a3a-4485-b3bc-05e69b40b290" format:"/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i"`
+	ProductIDs []string `json:"product_ids" binding:"required" example:"443b5f1c-8a3a-4485-b3bc-05e69b40b290" format:"/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i"`
+}
+
 type couponResponseItem struct {
 	models.Coupon
 }
@@ -53,6 +58,11 @@ type couponResponseItem struct {
 type couponResponse struct {
 	Coupons []couponResponseItem `json:"coupons"`
 	Total   int                  `json:"total"`
+}
+
+type discountedProductResponseItem struct {
+	ProductName string `json:"product_name" example:"商品名" format:"/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i"`
+	Price       uint   `json:"price" example:"1000"`
 }
 
 type searchCouponParams struct {
@@ -242,12 +252,10 @@ func (h *CouponHandler) UpdateCoupon(ctx *gin.Context) {
 // @Failure 500 {object} errorResponse
 // @Router /:coupon_id/users/:user_id [POST]
 // @Accept json
-// @Param coupon_id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
-// @Param user_id path string true "ID" minlength(36) maxlength(36) format(UUID v4)
+// @Param acquireCouponRequest body acquireCouponRequest true "acquire coupon"
 func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 	var req acquireCouponRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		log.Printf("err=%v", err)
 		res := createValidateErrorResponse(err)
 		ctx.AbortWithStatusJSON(res.Code, res)
 		return
@@ -312,6 +320,67 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 	}
 
 	ctx.Status(http.StatusCreated)
+}
+
+func (h *CouponHandler) DiscountedList(ctx *gin.Context) {
+	var req couponDiscountRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		res := createValidateErrorResponse(err)
+		ctx.AbortWithStatusJSON(res.Code, res)
+		return
+	}
+
+	traceID := appcontext.GetTraceID(ctx)
+	var coupon models.Coupon
+	if err := h.Db.First(&coupon, "id = ?", req.CouponID).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			h.logger.Error("failed to get coupon", zap.Error(err),
+				zap.String("trace_id", traceID))
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("coupon not found"))
+			return
+		}
+	}
+
+	var user models.User
+	if err := h.Db.First(&user, "id = ?", req.UserID).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			h.logger.Error("failed to find user", zap.Error(err),
+				zap.String("trace_id", traceID))
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("user not found"))
+			return
+		}
+	}
+
+	var couponUser models.CouponUser
+	if err := h.Db.Table("coupon_user").
+		First(&couponUser, "coupon_id = ? and user_id = ?", req.CouponID, req.UserID).
+		Error; err != nil {
+		h.logger.Error("failed to find coupon user", zap.Error(err),
+			zap.String("trace_id", traceID))
+		return
+	}
+
+	var products []models.Product
+	if err := h.Db.Where(req.ProductIDs).Find(&products).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			h.logger.Error("failed to find products", zap.Error(err),
+				zap.String("trace_id", traceID))
+			ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("products not found"))
+			return
+		}
+	}
+
+	if len(products) == 0 {
+		h.logger.Error("no products", zap.Error(nil), zap.String("trace_id", traceID))
+		ctx.JSON(http.StatusNotFound, errors.NewNotFoundError("products not found"))
+		return
+	}
+
+	for i, product := range products {
+		products[i].Price = product.Price - uint(coupon.DiscountAmount)
+	}
+	ctx.JSON(http.StatusOK, products)
+	return
 }
 
 func createCouponQueryBuilder(params searchCouponParams, h *CouponHandler) *gorm.DB {
