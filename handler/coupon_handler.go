@@ -322,6 +322,19 @@ func (h *CouponHandler) AcquireCoupon(ctx *gin.Context) {
 	ctx.Status(http.StatusCreated)
 }
 
+// DiscountedList @title coupon獲得
+// @id DiscountedList
+// @tags coupons
+// @version バージョン(1.0)
+// @description couponを適用後の価格を返す
+// @Summary coupon適用価格
+// @Produce json
+// @Success 200 {object} []models.Product
+// @Failure 400 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Router /discounted [POST]
+// @Accept json
+// @Param couponDiscountRequest body couponDiscountRequest true "discounted"
 func (h *CouponHandler) DiscountedList(ctx *gin.Context) {
 	var req couponDiscountRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
