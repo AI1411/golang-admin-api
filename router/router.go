@@ -130,6 +130,7 @@ func Router() *gin.Engine {
 	subscriptionMembers := authorized.Group("/subscriptionMembers")
 	{
 		subscriptionMembers.GET("", subscriptionMemberHandler.GetSubscriptionMember)
+		subscriptionMembers.GET("/:id", subscriptionMemberHandler.GetSubscriptionMemberDetail)
 	}
 
 	r.GET("/qrcode", qrcodeHandler.GenerateQrcode)
