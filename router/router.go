@@ -131,6 +131,7 @@ func Router() *gin.Engine {
 	{
 		subscriptionMembers.GET("", subscriptionMemberHandler.GetSubscriptionMember)
 		subscriptionMembers.GET("/:id", subscriptionMemberHandler.GetSubscriptionMemberDetail)
+		subscriptionMembers.POST("", subscriptionMemberHandler.CreateSubscriptionMember)
 	}
 
 	r.GET("/qrcode", qrcodeHandler.GenerateQrcode)

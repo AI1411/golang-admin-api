@@ -5,9 +5,7 @@ CREATE TABLE `subscription_members`
     user_id                char(36)                            NOT NULL comment 'ユーザID',
     member_status          varchar(64)                         NOT NULL comment '会員ステータス',
     member_start_date      timestamp default current_timestamp NOT NULL comment '会員開始日',
-    member_end_date        timestamp                           NULL comment '会員開始日',
-    member_stop_start_date timestamp default current_timestamp NOT NULL comment '会員停止開始日',
-    member_stop_end_date   timestamp                           NULL comment '会員停止終了日',
+    member_end_date        timestamp                           NOT NULL comment '会員開始日',
     created_at             timestamp default current_timestamp NOT NULL comment '作成日時',
     updated_at             timestamp default current_timestamp NOT NULL comment '更新日時'
 ) ENGINE = InnoDB
