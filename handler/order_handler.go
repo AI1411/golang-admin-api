@@ -1,7 +1,12 @@
 package handler
 
 import (
+	"fmt"
+	"github.com/goark/koyomi"
+	"log"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/AI1411/golang-admin-api/util/appcontext"
@@ -34,6 +39,10 @@ type searchOrderParams struct {
 	OrderStatus string `form:"order_status" binding:"omitempty,oneof=new paid canceled delivered refunded returned partially partially_paid"`
 	Offset      string `form:"offset,default=0" binding:"omitempty,numeric"`
 	Limit       string `form:"limit,default=10" binding:"omitempty,numeric"`
+}
+
+type generatePDFRequest struct {
+	OrderID string `json:"order_id" binding:"required,uuid4"`
 }
 
 func (h *OrderHandler) GetOrders(ctx *gin.Context) {
@@ -178,6 +187,14 @@ func (h *OrderHandler) DeleteOrder(ctx *gin.Context) {
 }
 
 func (h *OrderHandler) ExportPDF(ctx *gin.Context) {
+	traceID := appcontext.GetTraceID(ctx)
+	var req generatePDFRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		res := createValidateErrorResponse(err)
+		res.outputErrorLog(h.logger, "failed to bind json params", traceID, err)
+		ctx.AbortWithStatusJSON(res.Code, res)
+		return
+	}
 	pdf := gopdf.GoPdf{}
 	A4 := *gopdf.PageSizeA4
 	A4Yoko := gopdf.Rect{W: A4.H, H: A4.W}
@@ -192,15 +209,47 @@ func (h *OrderHandler) ExportPDF(ctx *gin.Context) {
 	}
 	// 宛名
 	pdf.SetFont("ipaexg", "", 28)
-	drawText(&pdf, 300, 140, "山田 太郎")
+
+	var order models.Order
+	if err := h.Db.Where("id = ?", req.OrderID).First(&order).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			h.logger.Error("failed to get order", zap.Error(err),
+				zap.String("trace_id", traceID))
+			ctx.AbortWithStatusJSON(http.StatusNotFound, errors.NewNotFoundError("order not found"))
+			return
+		}
+		h.logger.Error("failed to get order", zap.Error(err),
+			zap.String("trace_id", traceID))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to get order", err))
+		return
+	}
+
+	var user models.User
+	if err := h.Db.Where("id = ?", order.UserID).First(&user).Error; err != nil {
+		if gorm.IsRecordNotFoundError(err) {
+			h.logger.Error("failed to get user", zap.Error(err),
+				zap.String("trace_id", traceID))
+			ctx.AbortWithStatusJSON(http.StatusNotFound, errors.NewNotFoundError("user not found"))
+			return
+		}
+		h.logger.Error("failed to get user", zap.Error(err),
+			zap.String("trace_id", traceID))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to get user", err))
+		return
+	}
+
+	drawText(&pdf, 300, 140, user.LastName+user.FirstName)
 	// 日付
 	pdf.SetFont("ipaexg", "", 15)
-	drawText(&pdf, 600, 100, "3")  // 年
-	drawText(&pdf, 635, 100, "10") // 月
-	drawText(&pdf, 676, 100, "15") // 日
+	year, month, day := convertKoyomi(order.CreatedAt)
+	log.Printf("%s%s月%s日", year, month, day)
+	drawText(&pdf, 600, 100, year)  // 年
+	drawText(&pdf, 635, 100, month) // 月
+	drawText(&pdf, 676, 100, day)   // 日
 	// 金額
 	pdf.SetFont("ipaexg", "", 28)
-	drawText(&pdf, 280, 200, "￥ 15,800 -")
+	totalPrice := convertPrice(int(order.TotalPrice))
+	drawText(&pdf, 280, 200, "¥"+totalPrice+"-")
 	// PDFをファイルに書き出す --- (*6)
 	pdf.WritePdf("ryosyusyo.pdf")
 }
@@ -209,6 +258,29 @@ func drawText(pdf *gopdf.GoPdf, x float64, y float64, s string) {
 	pdf.SetX(x)
 	pdf.SetY(y)
 	pdf.Cell(nil, s)
+}
+
+func convertPrice(price int) string {
+	arr := strings.Split(fmt.Sprintf("%d", price), "")
+	cnt := len(arr) - 1
+	res := ""
+	i2 := 0
+	for i := cnt; i >= 0; i-- {
+		if i2 > 2 && i2%3 == 0 {
+			res = fmt.Sprintf(",%s", res)
+		}
+		res = fmt.Sprintf("%s%s", arr[i], res)
+		i2++
+	}
+	return res
+}
+
+func convertKoyomi(date time.Time) (year, month, day string) {
+	tm := date
+	te := koyomi.NewDate(tm)
+	_, y := te.YearEraString()
+	year = strings.Split(y, "年")[0]
+	return year, strconv.Itoa(int(te.Month())), strconv.Itoa(te.Day())
 }
 
 func createOrderQueryBuilder(params searchOrderParams, h *OrderHandler) *gorm.DB {
