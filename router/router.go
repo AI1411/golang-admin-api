@@ -81,6 +81,7 @@ func Router() *gin.Engine {
 		orders.GET("/:id", orderHandler.GetOrder)
 		orders.PUT("/:id", orderHandler.UpdateOrder)
 		orders.DELETE("/:id", orderHandler.DeleteOrder)
+		orders.POST("/exportPDF", orderHandler.ExportPDF)
 	}
 	orderDetails := authorized.Group("/orderDetails")
 	{

@@ -9,6 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
+	"github.com/signintech/gopdf"
 
 	"github.com/AI1411/golang-admin-api/models"
 	"github.com/AI1411/golang-admin-api/util/errors"
@@ -174,6 +175,20 @@ func (h *OrderHandler) DeleteOrder(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusNoContent, nil)
+}
+
+func (h *OrderHandler) ExportPDF(ctx *gin.Context) {
+	pdf := gopdf.GoPdf{}
+	A4 := *gopdf.PageSizeA4
+	A4yoko := gopdf.Rect{W: A4.H, H: A4.W}
+	pdf.Start(gopdf.Config{PageSize: A4yoko})
+	pdf.AddPage()
+	template := pdf.ImportPage("./template.pdf", 1, "/MediaBox")
+	pageH := 1080 * (A4yoko.W / 1920) // テンプレートサイズ (1920x1080)
+	pdf.UseImportedTemplate(template, 0, 0, A4yoko.W, pageH)
+	pdf.Line(0, 0, A4yoko.W, A4yoko.H)
+	// PDFをファイルに書き出す --- (*5)
+	pdf.WritePdf("ryosyusyo.pdf")
 }
 
 func createOrderQueryBuilder(params searchOrderParams, h *OrderHandler) *gorm.DB {
