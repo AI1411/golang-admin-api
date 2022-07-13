@@ -180,15 +180,35 @@ func (h *OrderHandler) DeleteOrder(ctx *gin.Context) {
 func (h *OrderHandler) ExportPDF(ctx *gin.Context) {
 	pdf := gopdf.GoPdf{}
 	A4 := *gopdf.PageSizeA4
-	A4yoko := gopdf.Rect{W: A4.H, H: A4.W}
-	pdf.Start(gopdf.Config{PageSize: A4yoko})
+	A4Yoko := gopdf.Rect{W: A4.H, H: A4.W}
+	pdf.Start(gopdf.Config{PageSize: A4Yoko})
 	pdf.AddPage()
 	template := pdf.ImportPage("./template.pdf", 1, "/MediaBox")
-	pageH := 1080 * (A4yoko.W / 1920) // テンプレートサイズ (1920x1080)
-	pdf.UseImportedTemplate(template, 0, 0, A4yoko.W, pageH)
-	pdf.Line(0, 0, A4yoko.W, A4yoko.H)
-	// PDFをファイルに書き出す --- (*5)
+	pageH := 1080 * (A4Yoko.W / 1920)
+	pdf.UseImportedTemplate(template, 0, 0, A4Yoko.W, pageH)
+	err := pdf.AddTTFFont("ipaexg", "./ipaexg.ttf")
+	if err != nil {
+		panic(err)
+	}
+	// 宛名
+	pdf.SetFont("ipaexg", "", 28)
+	drawText(&pdf, 300, 140, "山田 太郎")
+	// 日付
+	pdf.SetFont("ipaexg", "", 15)
+	drawText(&pdf, 600, 100, "3")  // 年
+	drawText(&pdf, 635, 100, "10") // 月
+	drawText(&pdf, 676, 100, "15") // 日
+	// 金額
+	pdf.SetFont("ipaexg", "", 28)
+	drawText(&pdf, 280, 200, "￥ 15,800 -")
+	// PDFをファイルに書き出す --- (*6)
 	pdf.WritePdf("ryosyusyo.pdf")
+}
+
+func drawText(pdf *gopdf.GoPdf, x float64, y float64, s string) {
+	pdf.SetX(x)
+	pdf.SetY(y)
+	pdf.Cell(nil, s)
 }
 
 func createOrderQueryBuilder(params searchOrderParams, h *OrderHandler) *gorm.DB {
