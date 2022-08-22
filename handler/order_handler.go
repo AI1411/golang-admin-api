@@ -3,7 +3,6 @@ package handler
 import (
 	"fmt"
 	"github.com/goark/koyomi"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -240,18 +239,33 @@ func (h *OrderHandler) ExportPDF(ctx *gin.Context) {
 
 	drawText(&pdf, 300, 140, user.LastName+user.FirstName)
 	// 日付
-	pdf.SetFont("ipaexg", "", 15)
+	if err := pdf.SetFont("ipaexg", "", 15); err != nil {
+		h.logger.Error("failed to set font", zap.Error(err),
+			zap.String("trace_id", traceID))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to write pdf", err))
+		return
+	}
 	year, month, day := convertKoyomi(order.CreatedAt)
-	log.Printf("%s%s月%s日", year, month, day)
 	drawText(&pdf, 600, 100, year)  // 年
 	drawText(&pdf, 635, 100, month) // 月
 	drawText(&pdf, 676, 100, day)   // 日
 	// 金額
-	pdf.SetFont("ipaexg", "", 28)
+	if err := pdf.SetFont("ipaexg", "", 28); err != nil {
+		h.logger.Error("failed to set font", zap.Error(err),
+			zap.String("trace_id", traceID))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to write pdf", err))
+		return
+	}
 	totalPrice := convertPrice(int(order.TotalPrice))
 	drawText(&pdf, 280, 200, "¥"+totalPrice+"-")
-	// PDFをファイルに書き出す --- (*6)
-	pdf.WritePdf("ryosyusyo.pdf")
+	// PDFをファイルに書き出す
+	fileName := fmt.Sprintf("assets/pdf/%s_%s.pdf", order.ID, time.Now().Format("20060102150405"))
+	if err := pdf.WritePdf(fileName); err != nil {
+		h.logger.Error("failed to write pdf", zap.Error(err),
+			zap.String("trace_id", traceID))
+		ctx.AbortWithStatusJSON(http.StatusInternalServerError, errors.NewInternalServerError("failed to write pdf", err))
+		return
+	}
 }
 
 func drawText(pdf *gopdf.GoPdf, x float64, y float64, s string) {
