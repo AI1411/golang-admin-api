@@ -39,7 +39,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/goark/errs v1.1.0 // indirect
-	github.com/goark/koyomi v0.6.2 // indirect
+	github.com/goark/koyomi v0.6.2
 	github.com/goccy/go-json v0.9.8 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect

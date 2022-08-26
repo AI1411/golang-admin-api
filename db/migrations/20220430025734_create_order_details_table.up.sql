@@ -5,7 +5,7 @@ CREATE TABLE order_details
     order_id            char(36)                            NOT NULL comment '注文ID',
     product_id          char(36)                            NOT NULL comment '商品ID',
     quantity            varchar(64)                         NOT NULL comment '数量',
-    price               integer unsigned                    NOT NULL comment '価格',
+    price               mediumint unsigned                    NOT NULL comment '価格',
     order_detail_status varchar(64)                         NOT NULL comment '注文詳細ステータス',
     created_at          timestamp default current_timestamp NOT NULL comment '作成日時',
     updated_at          timestamp default current_timestamp NOT NULL comment '更新日時',

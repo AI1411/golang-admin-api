@@ -4,7 +4,7 @@ CREATE TABLE orders
     id           char(36) primary key                NOT NULL comment '注文ID',
     user_id      char(36)                            NOT NULL comment 'ユーザID',
     quantity     varchar(64)                         NOT NULL comment '数量',
-    total_price  integer unsigned                    NOT NULL comment '合計金額',
+    total_price  mediumint unsigned                  NOT NULL comment '合計金額',
     order_status varchar(64)                         NULL comment '注文ステータス',
     remarks      text                                NOT NULL comment '注文備考',
     created_at   timestamp default current_timestamp NOT NULL comment '作成日時',

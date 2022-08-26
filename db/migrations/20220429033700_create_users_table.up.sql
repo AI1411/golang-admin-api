@@ -4,7 +4,7 @@ CREATE TABLE users
     id         char(36) primary key               NOT NULL comment 'ID',
     first_name VARCHAR(64)                        NOT NULL comment '名前',
     last_name  VARCHAR(64)                        NOT NULL comment '姓',
-    age        integer unsigned                   NOT NULL comment '年齢',
+    age        tinyint unsigned                   NOT NULL comment '年齢',
     email      VARCHAR(64)                        NOT NULL comment 'メールアドレス',
     password   VARCHAR(255)                       NOT NULL comment 'パスワード',
     created_at DATETIME default current_timestamp NOT NULL comment '作成日時',

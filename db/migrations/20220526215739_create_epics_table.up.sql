@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS `epics`;
 CREATE TABLE `epics`
 (
     id               integer auto_increment primary key  NOT NULL comment 'ID',
-    is_open          boolean                             NOT NULL DEFAULT true comment '解放フラグ',
+    is_open          boolean   default false             NOT NULL DEFAULT true comment '解放フラグ',
     author_id        char(36)                            NULL comment '作成者ID',
     epic_title       varchar(64)                         NULL comment 'タイトル',
     epic_description varchar(255)                        NULL comment '説明',
