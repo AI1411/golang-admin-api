@@ -44,4 +44,4 @@ jobs:
           make migrate
 
       - name: Test
-        run: make test
+        run: make rtest
