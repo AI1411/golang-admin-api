@@ -2,13 +2,13 @@ package handler
 
 import (
 	"fmt"
+	"github.com/AI1411/golang-admin-api/logger"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 
 	"github.com/AI1411/golang-admin-api/middleware"
-	logger "github.com/AI1411/golang-admin-api/server"
 	"github.com/gin-gonic/gin/binding"
 
 	"github.com/stretchr/testify/require"

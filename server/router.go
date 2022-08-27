@@ -1,13 +1,13 @@
-package router
+package server
 
 import (
+	"github.com/AI1411/golang-admin-api/logger"
 	"log"
 
 	"github.com/AI1411/golang-admin-api/db"
 	"github.com/AI1411/golang-admin-api/handler"
 	"github.com/AI1411/golang-admin-api/middleware"
 	"github.com/AI1411/golang-admin-api/models"
-	logger "github.com/AI1411/golang-admin-api/server"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 )

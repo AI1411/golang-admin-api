@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/AI1411/golang-admin-api/router"
+	"github.com/AI1411/golang-admin-api/server"
 )
 
 // API共通情報はここに記載する
@@ -11,5 +11,5 @@ import (
 // @host localhost
 
 func main() {
-	router.Router()
+	server.Run()
 }

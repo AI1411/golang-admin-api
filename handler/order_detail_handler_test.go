@@ -3,12 +3,12 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/AI1411/golang-admin-api/logger"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/AI1411/golang-admin-api/middleware"
-	logger "github.com/AI1411/golang-admin-api/server"
 	"github.com/gin-gonic/gin/binding"
 
 	"github.com/stretchr/testify/require"
