@@ -14,5 +14,7 @@
     <file url="file://$PROJECT_DIR$/db/migrations/20220526223130_create_milestones_table.up.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/db/migrations/20220528005347_create_projects_table.up.sql" dialect="MySQL" />
     <file url="file://$PROJECT_DIR$/db/migrations/20220708213711_create_subscription_members_table.up.sql" dialect="MySQL" />
+    <file url="file://$PROJECT_DIR$/handler/milestone_handler_test.go" dialect="GenericSQL" />
+    <file url="PROJECT" dialect="MySQL" />
   </component>
 </project>

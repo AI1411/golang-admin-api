@@ -58,6 +58,7 @@ require (
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
+	golang.org/dl v0.0.0-20220802161245-b76e4016dde5 // indirect
 	golang.org/x/net v0.0.0-20220630215102-69896b714898 // indirect
 	golang.org/x/sys v0.0.0-20220702020025-31831981b65f // indirect
 	golang.org/x/tools v0.1.11 // indirect

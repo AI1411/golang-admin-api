@@ -39,20 +39,20 @@ var getMilestonesTestCases = []struct {
 		wantBody: `{
 			"milestones": [
 				{
-					"id": "de1ccf61-4f17-4f51-8a72-b12d1e5e4191",
-					"milestone_title": "なる早",
-					"milestone_description": "test description",
-					"project_id": "239fabd9-03da-4cd6-bffd-131544f12b5d",
-					"created_at": "2022-06-23T07:10:25+09:00",
-					"updated_at": "2022-06-23T07:10:25+09:00"
-				},
-				{
 					"id": "86b806e6-f34f-403b-b854-d31a79e2195e",
 					"milestone_title": "first",
 					"milestone_description": "first",
 					"project_id": "239fabd9-03da-4cd6-bffd-131544f12b5f",
 					"created_at": "2022-06-23T07:10:47+09:00",
 					"updated_at": "2022-06-23T07:10:47+09:00"
+				},
+				{
+					"id": "de1ccf61-4f17-4f51-8a72-b12d1e5e4191",
+					"milestone_title": "なる早",
+					"milestone_description": "test description",
+					"project_id": "239fabd9-03da-4cd6-bffd-131544f12b5d",
+					"created_at": "2022-06-23T07:10:25+09:00",
+					"updated_at": "2022-06-23T07:10:25+09:00"
 				}
 			],
 			"total": 2
@@ -155,12 +155,12 @@ var getMilestonesTestCases = []struct {
 		wantBody: `{
 			"milestones": [
 				{
-					"id": "86b806e6-f34f-403b-b854-d31a79e2195e",
-					"milestone_title": "first",
-					"milestone_description": "first",
-					"project_id": "239fabd9-03da-4cd6-bffd-131544f12b5f",
-					"created_at": "2022-06-23T07:10:47+09:00",
-					"updated_at": "2022-06-23T07:10:47+09:00"
+					"id": "de1ccf61-4f17-4f51-8a72-b12d1e5e4191",
+					"milestone_title": "なる早",
+					"milestone_description": "test description",
+					"project_id": "239fabd9-03da-4cd6-bffd-131544f12b5d",
+					"created_at": "2022-06-23T07:10:25+09:00",
+					"updated_at": "2022-06-23T07:10:25+09:00"
 				}
 			],
 			"total": 1
@@ -176,12 +176,12 @@ var getMilestonesTestCases = []struct {
 		wantBody: `{
 			"milestones": [
 				{
-					"id": "de1ccf61-4f17-4f51-8a72-b12d1e5e4191",
-					"milestone_title": "なる早",
-					"milestone_description": "test description",
-					"project_id": "239fabd9-03da-4cd6-bffd-131544f12b5d",
-					"created_at": "2022-06-23T07:10:25+09:00",
-					"updated_at": "2022-06-23T07:10:25+09:00"
+					"id": "86b806e6-f34f-403b-b854-d31a79e2195e",
+					"milestone_title": "first",
+					"milestone_description": "first",
+					"project_id": "239fabd9-03da-4cd6-bffd-131544f12b5f",
+					"created_at": "2022-06-23T07:10:47+09:00",
+					"updated_at": "2022-06-23T07:10:47+09:00"
 				}
 			],
 			"total": 1
