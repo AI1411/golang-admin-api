@@ -31,7 +31,7 @@ func NewLogging(logger *zap.Logger) gin.HandlerFunc {
 		c.Request.Body = io.NopCloser(bytes.NewBuffer(bufBody))
 
 		logger.Info("request", zap.String("trace_id", traceID),
-			zap.String("http method", c.Request.Method),
+			zap.String("http_method", c.Request.Method),
 			zap.String("endpoint", endpoint),
 			zap.Any("header", c.Request.Header),
 			zap.Any("body", reqBody))
@@ -44,9 +44,10 @@ func NewLogging(logger *zap.Logger) gin.HandlerFunc {
 		c.Next()
 
 		logger.Info("response", zap.String("trace_id", traceID),
+			zap.String("http_method", c.Request.Method),
 			zap.String("endpoint", endpoint),
 			zap.Any("header", writer.Header()),
-			zap.Int("http status", writer.Status()),
+			zap.Int("http_status", writer.Status()),
 			zap.Any("body", writer.body.String()))
 	}
 }
