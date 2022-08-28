@@ -34,6 +34,7 @@ func Router() *gin.Engine {
 	epicHandler := handler.NewEpicHandler(dbConn, zapLogger)
 	projectHandler := handler.NewProjectHandler(dbConn, uuidGen, zapLogger)
 	subscriptionMemberHandler := handler.NewSubscriptionMemberHandler(dbConn, zapLogger, uuidGen)
+	issueHandler := handler.NewIssueHandler(dbConn, zapLogger)
 
 	r := gin.Default()
 
@@ -133,6 +134,10 @@ func Router() *gin.Engine {
 		subscriptionMembers.GET("", subscriptionMemberHandler.GetSubscriptionMember)
 		subscriptionMembers.GET("/:id", subscriptionMemberHandler.GetSubscriptionMemberDetail)
 		subscriptionMembers.POST("", subscriptionMemberHandler.CreateSubscriptionMember)
+	}
+	issues := authorized.Group("/issues")
+	{
+		issues.GET("", issueHandler.GetIssues)
 	}
 
 	r.GET("/qrcode", qrcodeHandler.GenerateQrcode)
